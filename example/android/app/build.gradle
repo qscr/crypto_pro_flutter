@@ -47,7 +47,7 @@ android {
         applicationId "com.a2soft.crypto_pro_flutter_example"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
-        minSdkVersion flutter.minSdkVersion
+        minSdkVersion 24
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -67,5 +67,6 @@ flutter {
 }
 
 dependencies {
+    implementation fileTree(dir: 'libs', include: '*.aar')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

@@ -14,7 +14,7 @@ abstract class CryptoProFlutterPlatform extends PlatformInterface {
   ///
   /// Defaults to [MethodChannelCryptoProFlutter].
   static CryptoProFlutterPlatform get instance => _instance;
-  
+
   /// Platform-specific implementations should set this with their own
   /// platform-specific class that extends [CryptoProFlutterPlatform] when
   /// they register themselves.
@@ -23,7 +23,7 @@ abstract class CryptoProFlutterPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<String?> getPlatformVersion() {
+  Future<bool> initCSP() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 }

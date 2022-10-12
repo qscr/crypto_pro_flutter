@@ -4,12 +4,13 @@ import 'package:crypto_pro_flutter/crypto_pro_flutter_platform_interface.dart';
 import 'package:crypto_pro_flutter/crypto_pro_flutter_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-class MockCryptoProFlutterPlatform 
+class MockCryptoProFlutterPlatform
     with MockPlatformInterfaceMixin
     implements CryptoProFlutterPlatform {
-
   @override
-  Future<String?> getPlatformVersion() => Future.value('42');
+  Future<bool> initCSP() {
+    return Future(() => true);
+  }
 }
 
 void main() {
@@ -19,11 +20,11 @@ void main() {
     expect(initialPlatform, isInstanceOf<MethodChannelCryptoProFlutter>());
   });
 
-  test('getPlatformVersion', () async {
+  test('initCSP', () async {
     CryptoProFlutter cryptoProFlutterPlugin = CryptoProFlutter();
     MockCryptoProFlutterPlatform fakePlatform = MockCryptoProFlutterPlatform();
     CryptoProFlutterPlatform.instance = fakePlatform;
-  
-    expect(await cryptoProFlutterPlugin.getPlatformVersion(), '42');
+
+    expect(await cryptoProFlutterPlugin.initCSP(), true);
   });
 }
