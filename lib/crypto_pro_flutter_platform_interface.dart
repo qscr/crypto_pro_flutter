@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'crypto_pro_flutter_method_channel.dart';
@@ -25,5 +27,9 @@ abstract class CryptoProFlutterPlatform extends PlatformInterface {
 
   Future<bool> initCSP() {
     throw UnimplementedError('platformVersion() has not been implemented.');
+  }
+
+  Future<String> addCertificate(File file, String password) {
+    throw UnimplementedError('addCertificate() has not been implemented.');
   }
 }

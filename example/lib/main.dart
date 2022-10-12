@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -60,7 +63,26 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-            child: _errorMessage != null ? Text(_errorMessage!) : Text(_initCSPResult.toString())),
+          child: Column(
+            children: [
+              ElevatedButton(
+                onPressed: () async {
+                  FilePickerResult? result = await FilePicker.platform.pickFiles();
+                  if (result?.isSinglePick ?? false) {
+                    final file = File(result!.files.single.path!);
+                    final ad = await _cryptoProFlutterPlugin.addPfxCertificate(file, "12345678");
+                  }
+                },
+                child: const Text("Добавить сертификат"),
+              ),
+              _errorMessage != null
+                  ? Text(_errorMessage!)
+                  : Text(
+                      _initCSPResult.toString(),
+                    ),
+            ],
+          ),
+        ),
       ),
     );
   }

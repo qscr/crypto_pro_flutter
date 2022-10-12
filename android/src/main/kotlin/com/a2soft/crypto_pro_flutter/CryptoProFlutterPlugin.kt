@@ -35,7 +35,7 @@ class CryptoProFlutterPlugin: FlutterPlugin, MethodCallHandler {
             val path = call.argument<String>("path")
             val password = call.argument<String>("password")
             if (path != null && password != null) {
-              result.success(CryptoProModule.getInstance().addPfxCertificate(path, password))
+              result.success(CryptoProModule.getInstance().addPfxCertificate(path, password).toString())
             } else {
               throw NullPointerException()
             }

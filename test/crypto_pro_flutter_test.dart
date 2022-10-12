@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:crypto_pro_flutter/crypto_pro_flutter.dart';
 import 'package:crypto_pro_flutter/crypto_pro_flutter_platform_interface.dart';
@@ -10,6 +12,12 @@ class MockCryptoProFlutterPlatform
   @override
   Future<bool> initCSP() {
     return Future(() => true);
+  }
+
+  @override
+  Future<String> addCertificate(File file, String password) {
+    // TODO: implement addCertificate
+    throw UnimplementedError();
   }
 }
 

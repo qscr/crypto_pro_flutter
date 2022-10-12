@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -17,27 +18,20 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
     return result ?? false;
   }
 
-  Future<Certificate> addCertificate(File file, String password) async {
+  @override
+  Future<String> addCertificate(File file, String password) async {
     try {
-      String response = await methodChannel
-          .invokeMethod("addPfxCertificate", {"path": file.path, "password": password});
+      String response = await methodChannel.invokeMethod(
+        "addPfxCertificate",
+        {
+          "path": file.path,
+          "password": password,
+        },
+      );
       Map map = json.decode(response) as Map;
-      if (map["success"] as bool) {
-        Certificate certificate = Certificate.fromBase64(map);
-        Directory directory = await getApplicationDocumentsDirectory();
-        String filePath = "${directory.path}/certificates/${certificate.uuid}.pfx";
-        File(filePath);
-        await file.copy(filePath);
-        file.delete();
-        return certificate;
-      }
-      throw ApiResponseException(map["message"] as String, map["exception"].toString());
+      return "true";
     } catch (exception) {
-      if (exception is ApiResponseException) rethrow;
-      if (exception is PlatformException)
-        throw ApiResponseException(exception.message, exception.details.toString());
-      throw ApiResponseException(
-          "Не удалось добавить сертификат в хранилище", exception.toString());
+      throw Exception();
     }
   }
 }
