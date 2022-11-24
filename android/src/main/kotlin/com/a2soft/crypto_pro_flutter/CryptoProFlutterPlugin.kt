@@ -35,7 +35,41 @@ class CryptoProFlutterPlugin: FlutterPlugin, MethodCallHandler {
             val path = call.argument<String>("path")
             val password = call.argument<String>("password")
             if (path != null && password != null) {
-              result.success(CryptoProModule.getInstance().addPfxCertificate(path, password).toString())
+              result.success(CryptoProModule.getInstance().addPfxCertificate(path, password, context!!).toString())
+            } else {
+              throw NullPointerException()
+            }
+          }
+          "getInstalledCertificates" -> {
+            result.success(CryptoProModule.getInstance().getInstalledCertificates().toString())
+          }
+          "deletePfxCertificate" -> {
+            val alias = call.argument<String>("alias")
+            if (alias != null) {
+              result.success(CryptoProModule.getInstance().deletePfxCertificate(alias).toString())
+            } else {
+              throw NullPointerException()
+            }
+          }
+          "signFile" -> {
+            val path = call.argument<String>("path")
+            val alias = call.argument<String>("alias")
+            val password = call.argument<String>("password")
+            val isDetached = call.argument<Boolean>("isDetached")
+            if (path != null && password != null && alias != null && isDetached != null) {
+              result.success(CryptoProModule.getInstance().signFile(path, alias, password, isDetached).toString())
+            } else {
+              throw NullPointerException()
+            }
+          }
+          "signMessage" -> {
+            val message = call.argument<String>("message")
+            val alias = call.argument<String>("alias")
+            val password = call.argument<String>("password")
+            val isDetached = call.argument<Boolean>("isDetached")
+            val signHash = call.argument<Boolean>("signHash")
+            if (message != null && password != null && alias != null && isDetached != null && signHash != null) {
+              result.success(CryptoProModule.getInstance().signMessage(message, alias, password, isDetached, signHash).toString())
             } else {
               throw NullPointerException()
             }

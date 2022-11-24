@@ -75,6 +75,48 @@ class _MyAppState extends State<MyApp> {
                 },
                 child: const Text("Добавить сертификат"),
               ),
+              ElevatedButton(
+                onPressed: () async {
+                  final list = await _cryptoProFlutterPlugin.getInstalledCertificates();
+                  final ad = await _cryptoProFlutterPlugin.deleteCertificate(list.first);
+                },
+                child: const Text("Удалить сертификат"),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final list = await _cryptoProFlutterPlugin.getInstalledCertificates();
+                  print(list);
+                },
+                child: const Text("Получить установленные сертификаты"),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  FilePickerResult? result = await FilePicker.platform.pickFiles();
+                  if (result?.isSinglePick ?? false) {
+                    final list = await _cryptoProFlutterPlugin.getInstalledCertificates();
+                    final file = File(result!.files.single.path!);
+                    final sign = await _cryptoProFlutterPlugin.signFile(
+                      file: file,
+                      certificate: list.first,
+                      password: "12345678",
+                    );
+                    print(sign);
+                  }
+                },
+                child: const Text("Подписать файл"),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final list = await _cryptoProFlutterPlugin.getInstalledCertificates();
+                  final sign = await _cryptoProFlutterPlugin.signMessage(
+                    message: "Тест",
+                    certificate: list.first,
+                    password: "12345678",
+                  );
+                  print(sign);
+                },
+                child: const Text("Подписать сообщение"),
+              ),
               _errorMessage != null
                   ? Text(_errorMessage!)
                   : Text(
