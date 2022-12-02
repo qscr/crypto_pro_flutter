@@ -1,0 +1,91 @@
+﻿[UTF-8]
+[Use `iconv -f utf-8', if needed]
+
+  В данный момент поддерживается три считывателя смарт-карт: Feitian, Aladdin и Aktiv.
+  Можно собрать приложения так, чтобы оно работало с любым из них или без поддержки 
+  считывателя смарт-карт.
+  Для обновления списка считывателей в процессе работы приложения добавьте в config.ini
+  в секцию [Parameters] строку dynamic_readers = 1
+  
+1.  Для сборки приложения без поддержки считывателя смарт-карт добавьте в линковку 
+    библиотеку readers/librdrpcsc_empty.o. Это делается аналогично п.3 инструкции 
+    по сборке примера.
+
+2.  Для сборки с поддержкой смарт-карт нужно добавить в линковку два вида библиотек:
+    модули поддержки ключевых носителей и драйверы считывателей.
+    * Модуль поддержки cryptoki подключается через readers/libcsp_cryptoki.o. Подробнее о работе со смарткартами через cryptoki + pkcs11-библиотеки см п.6 настоящей инструкции.
+    * Модуль поддержки ФКН-ов с SESPAKE входит в состав основного фреймворка CPCSP. 
+    * Остальные модули поддержки, разрабатываемые КриптоПро, объединены в библиотеку readers/libcsp_scards.o.
+    * Подключение драйверов считывателей описано в пунктах 3-5 настоящей инструкции. 
+
+3.  Считыватель Feitian iR301-U.
+    Поддерживает работу с большинством смарт-карт.
+    Для сборки приложения с драйвером этого считывателя:
+    * Добавьте в линковку библиотеку из каталога readers/Aladdin/libiRockey301_ccid.a.
+    * Это делается аналогично п.3 инструкции по сборке примера.
+    * Плюс надо добавить в параметры цели сборки путь к каталогу с библиотекой
+      libiRockey301_ccid.a (Targets\Build Settings\Library Search Paths).
+    * Добавьте в Info.plist вашего приложения:
+    
+        <key>UISupportedExternalAccessoryProtocols</key>
+        <array>
+          <string>com.ftsafe.CRD</string>
+          <string>com.ftsafe.iR301</string>
+        </array>
+
+    * Последнюю версию библиотеки можно взять из официального репозитория Feitian: https://github.com/FeitianSmartcardReader
+    * Существует специальная версия этого считывателя от Аладдин - для него последние официальные версии драйвера могут не работать.
+
+4.  Для сборки приложения с поддержкой bluetooth-токена Рутокен ЭЦП 2.0 Bluetooth
+    от компании Актив добавьте в линковку фреймворк RtPcsc.framework
+    из Рутокен SDK (http://www.rutoken.ru/developers/sdk/), а также системные фреймворки
+    Security.framework и ExternalAccessory.framework.
+    Это делается аналогично п.3 инструкции по сборке примера.
+
+    Укажите путь к фреймворкам из SDK Рутокен в XCode (Targets\Build Settings\Framework Search Path).
+
+    Добавьте фреймворк RtPcsc.framework
+    из состава Рутокен SDK в Embedded binaries (Targets\General\Embedded Binaries)
+
+    Добавьте в параметры цели сборки в "Other linker flags" флаг "-all_load".
+    
+    Добавьте в параметры цели сборки флаг "-force_load" (Targets\Build Settings\Other Linker Flags):
+    -force_load /путь/к фреймворкам/рутокен_sdk/RtPcsc.framework/RtPcsc
+
+    Добавьте в Info.plist вашего приложения:
+ 
+    <key>NSBluetoothAlwaysUsageDescription</key>
+        <string>Bluetooth будет использован для работы с устройствами Рутокен</string>
+        <key>NSBluetoothPeripheralUsageDescription</key>
+         <string>Access bluetooth smartcard</string>
+        <key>UISupportedExternalAccessoryProtocols</key>
+        <array>
+          <string>com.aktivco.rutokenecp</string>
+        </array>
+
+5. Для сборки приложения с поддержкой Рутокен ЭЦП 3.0 NFC от компании Актив (необходим сертификат разработчика iOS с правом разработки приложений для NFC):
+    1. Добавьте в линковку фреймворк RtPcsc.framework. Нужна версия с поддержкой NFC (2.0 и выше).
+       Получить версию фреймворка можно с помощью команды /usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' [PATH_TO_RTPCSC]/RtPcsc.framework/Info.plist).
+    2. При линковке с RtPcsc укажите для него режим "Embed and sign".
+    3. В Entitlements.plist добавьте: 
+       <key>com.apple.developer.nfc.readersession.formats</key> 
+       <array> 
+          <string>TAG</string> 
+        </array> 
+    4. В Info.plist добавьте:
+       <key>NFCReaderUsageDescription</key>
+       <string>Allow NFC scanning</string> 
+       <key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
+        <array>
+                <string>F0000000005275746F6B656E</string>
+                <string>A00000039742544659</string>
+        </array> 
+    5. Перед кодом, использующим NFC-карту (например, через CryptoAPI), нужно активировать обнаружение NFC. После выполнения операции (например, подписи) - остановить NFC. 
+       Сделать это можно с помощью вызовов SCardListReaders, SCardConnect, SCardControl. Пример кода можно найти в SDK Рутокен:
+       https://github.com/AktivCo/rutoken-demoshift-ios/blob/master/demoshift/PcscWrapper/PcscWrapper.swift
+       https://dev.rutoken.ru/pages/viewpage.action?pageId=81527019
+
+6. Для работы со смарткартами в режиме pkcs11 в приложение надо влинковать libcsp_cryptoki.o и pkcs11-модуль производителя, с чьим токеном вы планируете работать.
+      В приложении можно использовать не больше одного модуля pkcs11 одновременно (e.g. rtpkcs11ecp.framework).
+      При работе со смарт-картами через cryptoki нужно установить модули, которые требуются для выбранной pkcs11-библиотеки - смотрите документацию производителя.
+      Драйверы считывателей в общем случае здесь не нужны; подключать их надо, только если этого требует документация pkcs11-библиотеки.

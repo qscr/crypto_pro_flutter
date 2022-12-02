@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:crypto_pro_flutter/models/certificate.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -105,12 +106,33 @@ class _MyAppState extends State<MyApp> {
                 },
                 child: const Text("Подписать файл"),
               ),
+              // ElevatedButton(
+              //   onPressed: () async {
+              //     final list = await _cryptoProFlutterPlugin.getInstalledCertificates();
+              //     final sign = await _cryptoProFlutterPlugin.signMessage(
+              //       message: "Тест",
+              //       certificate: list.first,
+              //       password: "12345678",
+              //     );
+              //     print(sign);
+              //   },
+              //   child: const Text("Подписать сообщение"),
+              // ),
               ElevatedButton(
                 onPressed: () async {
-                  final list = await _cryptoProFlutterPlugin.getInstalledCertificates();
                   final sign = await _cryptoProFlutterPlugin.signMessage(
                     message: "Тест",
-                    certificate: list.first,
+                    certificate: Certificate(
+                      alias: "alias",
+                      algorithm: null,
+                      issuer: null,
+                      oid: null,
+                      owner: null,
+                      serialNumber: null,
+                      validFrom: null,
+                      validTo: null,
+                      version: null,
+                    ),
                     password: "12345678",
                   );
                   print(sign);
