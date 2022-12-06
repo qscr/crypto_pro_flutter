@@ -1,7 +1,7 @@
 name: crypto_pro_flutter
-description: A new Flutter plugin project.
+description: Подписание файлов и сообщений с помощью Crypto Pro
 version: 0.0.1
-homepage:
+homepage: https://github.com/qscr/crypto_pro_flutter.git
 
 environment:
   sdk: ">=2.17.1 <3.0.0"
