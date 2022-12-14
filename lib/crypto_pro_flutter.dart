@@ -32,12 +32,14 @@ class CryptoProFlutter {
     required Certificate certificate,
     required String password,
     bool isDetached = true,
+    bool disableOnlineValidation = false,
   }) async {
     return await CryptoProFlutterPlatform.instance.signFile(
       file: file,
       certificate: certificate,
       password: password,
       isDetached: true,
+      disableOnlineValidation: disableOnlineValidation,
     );
   }
 
@@ -48,6 +50,7 @@ class CryptoProFlutter {
     required String password,
     bool isDetached = true,
     bool signHash = false,
+    bool disableOnlineValidation = false,
   }) async {
     return await CryptoProFlutterPlatform.instance.signMessage(
       message: message,
@@ -55,6 +58,7 @@ class CryptoProFlutter {
       password: password,
       isDetached: isDetached,
       signHash: signHash,
+      disableOnlineValidation: disableOnlineValidation,
     );
   }
 }
