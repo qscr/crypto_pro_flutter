@@ -57,8 +57,8 @@ class CryptoProFlutterPlugin: FlutterPlugin, MethodCallHandler {
             val password = call.argument<String>("password")
             val isDetached = call.argument<Boolean>("isDetached")
             val disableOnlineValidation = call.argument<Boolean>("disableOnlineValidation")
-            if (path != null && password != null && alias != null && isDetached != null) {
-              result.success(CryptoProModule.getInstance().signFile(path, alias, password, isDetached).toString())
+            if (path != null && password != null && alias != null && isDetached != null && disableOnlineValidation != null) {
+              result.success(CryptoProModule.getInstance().signFile(path, alias, password, isDetached, disableOnlineValidation).toString())
             } else {
               throw NullPointerException()
             }
@@ -70,8 +70,8 @@ class CryptoProFlutterPlugin: FlutterPlugin, MethodCallHandler {
             val isDetached = call.argument<Boolean>("isDetached")
             val signHash = call.argument<Boolean>("signHash")
             val disableOnlineValidation = call.argument<Boolean>("disableOnlineValidation")
-            if (message != null && password != null && alias != null && isDetached != null && signHash != null) {
-              result.success(CryptoProModule.getInstance().signMessage(message, alias, password, isDetached, signHash).toString())
+            if (message != null && password != null && alias != null && isDetached != null && signHash != null && disableOnlineValidation != null) {
+              result.success(CryptoProModule.getInstance().signMessage(message, alias, password, isDetached, signHash, disableOnlineValidation).toString())
             } else {
               throw NullPointerException()
             }
