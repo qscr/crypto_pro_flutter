@@ -1,13 +1,12 @@
 package com.a2soft.crypto_pro_flutter
 
 import android.content.Context
-import android.util.Base64
-import android.util.Log
 import com.a2soft.crypto_pro_flutter.exceptions.NoPrivateKeyFound
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import ru.CryptoPro.AdES.AdESConfig
+import ru.CryptoPro.AdES.Options
 import ru.CryptoPro.CAdES.CAdESSignature
 import ru.CryptoPro.CAdES.CAdESType
 import ru.CryptoPro.JCP.KeyStore.JCPPrivateKeyEntry
@@ -17,8 +16,12 @@ import ru.CryptoPro.JCSP.CSPConfig
 import ru.CryptoPro.JCSP.JCSP
 import ru.CryptoPro.JCSP.support.BKSTrustStore
 import ru.CryptoPro.reprov.RevCheck
+import ru.CryptoPro.ssl.util.cpSSLConfig
 import java.io.*
-import java.security.*
+import java.security.KeyStore
+import java.security.KeyStoreException
+import java.security.PrivateKey
+import java.security.Security
 import java.security.cert.X509Certificate
 
 /** Модуль для работы с Crypto Pro */
@@ -56,6 +59,8 @@ class CryptoProModule {
 
             // Задание провайдера по умолчанию для CAdES.
             AdESConfig.setDefaultProvider(JCSP.PROVIDER_NAME)
+            // https://cryptopro.ru/forum2/default.aspx?g=posts&t=20779
+            cpSSLConfig.setDefaultSSLProvider(JCSP.PROVIDER_NAME)
 
             // Включаем возможность онлайновой проверки статуса
             // сертификата.
@@ -126,7 +131,7 @@ class CryptoProModule {
     }
 
     /** Подписать файл */
-    fun signFile(filePathToSign: String, alias: String, password: String, detached: Boolean) : JSONObject {
+    fun signFile(filePathToSign: String, alias: String, password: String, detached: Boolean, disableOnlineValidation: Boolean) : JSONObject {
         try {
             val fileInputStream = FileInputStream(filePathToSign)
             val size = fileInputStream.available()
@@ -134,7 +139,7 @@ class CryptoProModule {
             fileInputStream.read(buffer)
             fileInputStream.close()
 
-            return sign(buffer, alias, password, detached, false)
+            return sign(buffer, alias, password, detached, false, disableOnlineValidation)
         } catch (e: NoPrivateKeyFound) {
             return getErrorResponse("Не найден приватный ключ, связанный с сертификатом", e)
         } catch (e: Exception) {
@@ -143,12 +148,12 @@ class CryptoProModule {
     }
 
     /** Подписать сообщение */
-    fun signMessage(contentToSign: String, alias: String, password: String, detached: Boolean, signHash: Boolean) : JSONObject {
-        return sign(contentToSign.toByteArray(), alias, password, detached, signHash)
+    fun signMessage(contentToSign: String, alias: String, password: String, detached: Boolean, signHash: Boolean, disableOnlineValidation: Boolean) : JSONObject {
+        return sign(contentToSign.toByteArray(), alias, password, detached, signHash, disableOnlineValidation)
     }
 
     /** Подписание массива байт */
-    private fun sign(contentToSign: ByteArray, alias: String, password: String, detached: Boolean, signHash: Boolean) : JSONObject {
+    private fun sign(contentToSign: ByteArray, alias: String, password: String, detached: Boolean, signHash: Boolean, disableOnlineValidation: Boolean) : JSONObject {
         try {
             // Получаем из HDImage сертификат (которым будем подписывать) с приватным ключем
             val keyStore = KeyStore.getInstance(JCSP.HD_STORE_NAME, JCSP.PROVIDER_NAME)
@@ -161,25 +166,31 @@ class CryptoProModule {
             chain.add(certificate)
 
             val cAdESSignature = CAdESSignature(detached, signHash)
+            if (disableOnlineValidation) {
+                cAdESSignature.setOptions((Options()).disableCertificateValidation());
+            }
+
+            var exception: Exception? = null;
+
 
             val gfgThread = Thread {
                 try {
-                    try {
-                        cAdESSignature.addSigner(
-                            JCSP.PROVIDER_NAME, null, null, privateKey, chain,
-                            CAdESType.CAdES_BES, null, false, null, null, null,
-                            true
-                        )
-                    } catch (e: Exception) {
-                        Log.d("ex", e.toString())
-                    }
-                } catch (e: java.lang.Exception) {
-                    e.printStackTrace()
+                    cAdESSignature.addSigner(
+                        JCSP.PROVIDER_NAME, null, null, privateKey, chain,
+                        CAdESType.CAdES_BES, null, false, null, null, null,
+                        true
+                    )
+                } catch (e: Exception) {
+                    exception = e
                 }
             }
 
             gfgThread.start()
             gfgThread.join();
+
+            if (exception != null) {
+                return getErrorResponse(exception.toString(), exception!!)
+            }
 
             val signatureStream = ByteArrayOutputStream()
 

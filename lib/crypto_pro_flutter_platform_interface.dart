@@ -52,6 +52,7 @@ abstract class CryptoProFlutterPlatform extends PlatformInterface {
     required Certificate certificate,
     required String password,
     bool isDetached = true,
+    bool disableOnlineValidation = false,
   }) {
     throw UnimplementedError('signFile() has not been implemented.');
   }
@@ -63,6 +64,7 @@ abstract class CryptoProFlutterPlatform extends PlatformInterface {
     required String password,
     bool isDetached = true,
     bool signHash = false,
+    bool disableOnlineValidation = false,
   }) {
     throw UnimplementedError('signMessage() has not been implemented.');
   }

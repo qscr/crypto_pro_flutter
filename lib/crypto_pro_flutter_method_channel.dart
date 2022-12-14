@@ -68,22 +68,23 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
     required Certificate certificate,
     required String password,
     bool isDetached = true,
+    bool disableOnlineValidation = false,
   }) async {
-    try {
-      String response = await methodChannel.invokeMethod(
-        "signFile",
-        {
-          "path": file.path,
-          "alias": certificate.alias,
-          "password": password,
-          "isDetached": isDetached,
-        },
-      );
-      Map<String, dynamic> map = json.decode(response);
-      return map["signBase64"] as String;
-    } catch (exception) {
-      throw Exception();
+    String response = await methodChannel.invokeMethod(
+      "signFile",
+      {
+        "path": file.path,
+        "alias": certificate.alias,
+        "password": password,
+        "isDetached": isDetached,
+        "disableOnlineValidation": disableOnlineValidation,
+      },
+    );
+    Map<String, dynamic> map = json.decode(response);
+    if (map["success"] == false) {
+      throw Exception(map["message"]);
     }
+    return map["signBase64"] as String;
   }
 
   @override
@@ -93,6 +94,7 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
     required String password,
     bool isDetached = true,
     bool signHash = false,
+    bool disableOnlineValidation = false,
   }) async {
     try {
       String response = await methodChannel.invokeMethod(
@@ -102,7 +104,8 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
           "alias": certificate.alias,
           "password": password,
           "isDetached": isDetached,
-          "signHash": signHash
+          "signHash": signHash,
+          "disableOnlineValidation": disableOnlineValidation,
         },
       );
       Map<String, dynamic> map = json.decode(response);
