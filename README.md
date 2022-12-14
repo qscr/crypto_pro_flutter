@@ -43,7 +43,6 @@ dependencies {
 Библиотеки .aar указаны в плагине как compile-only, так как невозможно к .aar (коим является этот плагин) подключать другие .aar, для этого требуется скопировать их к себе в проект и подключить как implementation. Proguard используется, чтобы запретить обфускацию кода, которая происходить при выполнении релизной сборки.
 
 ## __Использование__
-Работа с плагином выполнятся через собственный интерфейс плагина и его методы.
 
 * Инициализировать провайдер
     ```dart
@@ -68,6 +67,7 @@ dependencies {
         required Certificate certificate,
         required String password,
         bool isDetached = true,
+        bool disableOnlineValidation = false,
     )
     ```
 * Подписать сообщение
@@ -78,6 +78,8 @@ dependencies {
         required String password,
         bool isDetached = true,
         bool signHash = false,
+        bool signHash = false,
+        bool disableOnlineValidation = false,
     })
     ```
 
