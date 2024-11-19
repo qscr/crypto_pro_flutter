@@ -20,46 +20,36 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
 
   @override
   Future<Certificate> addCertificate(File file, String password) async {
-    try {
-      String response = await methodChannel.invokeMethod(
-        "addPfxCertificate",
-        {
-          "path": file.path,
-          "password": password,
-        },
-      );
-      Map<String, dynamic> map = json.decode(response) as Map<String, dynamic>;
-      final certificate = Certificate.fromMap(map["certificate"]);
-      return certificate;
-    } catch (exception) {
-      throw Exception();
-    }
+    String response = await methodChannel.invokeMethod(
+      "addPfxCertificate",
+      {
+        "path": file.path,
+        "password": password,
+      },
+    );
+    Map<String, dynamic> map = json.decode(response) as Map<String, dynamic>;
+    final certificate = Certificate.fromMap(map["certificate"]);
+    return certificate;
   }
 
   @override
   Future<void> deleteCertificate(Certificate certificate) async {
-    try {
-      await methodChannel.invokeMethod(
-        "deletePfxCertificate",
-        {
-          "alias": certificate.alias,
-        },
-      );
-    } catch (exception) {
-      throw Exception();
-    }
+    await methodChannel.invokeMethod(
+      "deletePfxCertificate",
+      {
+        "alias": certificate.alias,
+      },
+    );
   }
 
   @override
   Future<List<Certificate>> getInstalledCertificates() async {
-    try {
-      String response = await methodChannel.invokeMethod("getInstalledCertificates");
-      Map<String, dynamic> map = json.decode(response);
-      final certificatesMaps = List<Map<String, dynamic>>.from(map['certificates'] as List);
-      return certificatesMaps.map((e) => Certificate.fromMap(e)).toList();
-    } catch (exception) {
-      throw Exception();
-    }
+    String response =
+        await methodChannel.invokeMethod("getInstalledCertificates");
+    Map<String, dynamic> map = json.decode(response);
+    final certificatesMaps =
+        List<Map<String, dynamic>>.from(map['certificates'] as List);
+    return certificatesMaps.map((e) => Certificate.fromMap(e)).toList();
   }
 
   @override
@@ -81,9 +71,6 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
       },
     );
     Map<String, dynamic> map = json.decode(response);
-    if (map["success"] == false) {
-      throw Exception(map["message"]);
-    }
     return map["signBase64"] as String;
   }
 
@@ -96,22 +83,18 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
     bool signHash = false,
     bool disableOnlineValidation = false,
   }) async {
-    try {
-      String response = await methodChannel.invokeMethod(
-        "signMessage",
-        {
-          "message": message,
-          "alias": certificate.alias,
-          "password": password,
-          "isDetached": isDetached,
-          "signHash": signHash,
-          "disableOnlineValidation": disableOnlineValidation,
-        },
-      );
-      Map<String, dynamic> map = json.decode(response);
-      return map["signBase64"] as String;
-    } catch (exception) {
-      throw Exception();
-    }
+    String response = await methodChannel.invokeMethod(
+      "signMessage",
+      {
+        "message": message,
+        "alias": certificate.alias,
+        "password": password,
+        "isDetached": isDetached,
+        "signHash": signHash,
+        "disableOnlineValidation": disableOnlineValidation,
+      },
+    );
+    Map<String, dynamic> map = json.decode(response);
+    return map["signBase64"] as String;
   }
 }

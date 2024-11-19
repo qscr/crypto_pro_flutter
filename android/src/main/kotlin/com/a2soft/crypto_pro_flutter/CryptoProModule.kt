@@ -1,6 +1,7 @@
 package com.a2soft.crypto_pro_flutter
 
 import android.content.Context
+import com.a2soft.crypto_pro_flutter.exceptions.CustomWrongPasswordException
 import com.a2soft.crypto_pro_flutter.exceptions.NoPrivateKeyFound
 import org.json.JSONArray
 import org.json.JSONException
@@ -14,6 +15,7 @@ import ru.CryptoPro.JCP.params.JCPProtectionParameter
 import ru.CryptoPro.JCP.tools.Encoder
 import ru.CryptoPro.JCSP.CSPConfig
 import ru.CryptoPro.JCSP.JCSP
+import ru.CryptoPro.JCSP.exception.WrongPasswordException
 import ru.CryptoPro.JCSP.support.BKSTrustStore
 import ru.CryptoPro.reprov.RevCheck
 import ru.CryptoPro.ssl.util.cpSSLConfig
@@ -132,19 +134,13 @@ class CryptoProModule {
 
     /** Подписать файл */
     fun signFile(filePathToSign: String, alias: String, password: String, detached: Boolean, disableOnlineValidation: Boolean) : JSONObject {
-        try {
-            val fileInputStream = FileInputStream(filePathToSign)
-            val size = fileInputStream.available()
-            val buffer = ByteArray(size)
-            fileInputStream.read(buffer)
-            fileInputStream.close()
+        val fileInputStream = FileInputStream(filePathToSign)
+        val size = fileInputStream.available()
+        val buffer = ByteArray(size)
+        fileInputStream.read(buffer)
+        fileInputStream.close()
 
-            return sign(buffer, alias, password, detached, false, disableOnlineValidation)
-        } catch (e: NoPrivateKeyFound) {
-            return getErrorResponse("Не найден приватный ключ, связанный с сертификатом", e)
-        } catch (e: Exception) {
-            return getErrorResponse("Произошла непредвиденная ошибка", e)
-        }
+        return sign(buffer, alias, password, detached, false, disableOnlineValidation)
     }
 
     /** Подписать сообщение */
@@ -154,63 +150,52 @@ class CryptoProModule {
 
     /** Подписание массива байт */
     private fun sign(contentToSign: ByteArray, alias: String, password: String, detached: Boolean, signHash: Boolean, disableOnlineValidation: Boolean) : JSONObject {
-        try {
-            // Получаем из HDImage сертификат (которым будем подписывать) с приватным ключем
-            val keyStore = KeyStore.getInstance(JCSP.HD_STORE_NAME, JCSP.PROVIDER_NAME)
-            keyStore.load(null, null)
-            val certificate = keyStore.getCertificate(alias) as X509Certificate
-            val privateKey = keyStore.getKey(alias, password.toCharArray()) as PrivateKey
+        // Получаем из HDImage сертификат (которым будем подписывать) с приватным ключем
+        val keyStore = KeyStore.getInstance(JCSP.HD_STORE_NAME, JCSP.PROVIDER_NAME)
+        keyStore.load(null, null)
+        val certificate = keyStore.getCertificate(alias) as X509Certificate
+        val privateKey = keyStore.getKey(alias, password.toCharArray()) as PrivateKey
 
-            // Формируем цепочку для подписи
-            val chain: MutableList<X509Certificate> = ArrayList()
-            chain.add(certificate)
+        // Формируем цепочку для подписи
+        val chain: MutableList<X509Certificate> = ArrayList()
+        chain.add(certificate)
 
-            val cAdESSignature = CAdESSignature(detached, signHash)
-            if (disableOnlineValidation) {
-                cAdESSignature.setOptions((Options()).disableCertificateValidation());
-            }
-
-            var exception: Exception? = null;
-
-
-            val gfgThread = Thread {
-                try {
-                    cAdESSignature.addSigner(
-                        JCSP.PROVIDER_NAME, null, null, privateKey, chain,
-                        CAdESType.CAdES_BES, null, false, null, null, null,
-                        true
-                    )
-                } catch (e: Exception) {
-                    exception = e
-                }
-            }
-
-            gfgThread.start()
-            gfgThread.join();
-
-            if (exception != null) {
-                return getErrorResponse(exception.toString(), exception!!)
-            }
-
-            val signatureStream = ByteArrayOutputStream()
-
-            cAdESSignature.open(signatureStream)
-            cAdESSignature.update(contentToSign)
-
-            cAdESSignature.close()
-            signatureStream.close()
-
-            val enc = Encoder()
-            val base64 = enc.encode(signatureStream.toByteArray())
-
-
-            val response = JSONObject()
-            response.put("success", true)
-            response.put("signBase64", base64)
-            return response
-        } catch (e: Exception) {
-            return getErrorResponse("Произошла непредвиденная ошибка", e)
+        val cAdESSignature = CAdESSignature(detached, signHash)
+        if (disableOnlineValidation) {
+            cAdESSignature.setOptions((Options()).disableCertificateValidation());
         }
+
+        val gfgThread = Thread {
+            try {
+                cAdESSignature.addSigner(
+                    JCSP.PROVIDER_NAME, null, null, privateKey, chain,
+                    CAdESType.CAdES_BES, null, false, null, null, null,
+                    true
+                )
+            } catch (e: Exception) {
+                throw e
+            }
+        }
+
+        gfgThread.start()
+        gfgThread.join();
+
+        val signatureStream = ByteArrayOutputStream()
+
+        cAdESSignature.open(signatureStream)
+        cAdESSignature.update(contentToSign)
+
+        cAdESSignature.close()
+        signatureStream.close()
+
+        val enc = Encoder()
+        val base64 = enc.encode(signatureStream.toByteArray())
+
+
+        val response = JSONObject()
+        response.put("success", true)
+        response.put("signBase64", base64)
+        return response
     }
 
 
@@ -249,51 +234,39 @@ class CryptoProModule {
             response.put("success", true)
             response.put("certificate", getJSONCertificate(mainCertAlias, certificate))
             return response
-        } catch (e: NoPrivateKeyFound) {
-            return getErrorResponse("Не найден приватный ключ, связанный с сертификатом", e)
-        } catch (e: Exception) {
-            return getErrorResponse("Произошла непредвиденная ошибка", e)
+        } catch (e: WrongPasswordException) {
+            throw CustomWrongPasswordException()
         }
     }
 
     /** Удаление PFX-сертификата */
     fun deletePfxCertificate(alias: String): JSONObject {
-        try {
-            val keyStore = KeyStore.getInstance(JCSP.HD_STORE_NAME, JCSP.PROVIDER_NAME)
-            keyStore.load(null, null)
-            keyStore.deleteEntry(alias)
+        val keyStore = KeyStore.getInstance(JCSP.HD_STORE_NAME, JCSP.PROVIDER_NAME)
+        keyStore.load(null, null)
+        keyStore.deleteEntry(alias)
 
-            val response = JSONObject()
-            response.put("success", true)
-            return response
-        } catch (e: NoPrivateKeyFound) {
-            return getErrorResponse("Не найден приватный ключ, связанный с сертификатом", e)
-        } catch (e: Exception) {
-            return getErrorResponse("Произошла непредвиденная ошибка", e)
-        }
+        val response = JSONObject()
+        response.put("success", true)
+        return response
     }
 
     /** Получение установленных сертификатов */
     fun getInstalledCertificates(): JSONObject {
-        try {
-            val keyStore = KeyStore.getInstance(JCSP.HD_STORE_NAME, JCSP.PROVIDER_NAME)
-            keyStore.load(null, null)
-            val aliases = keyStore.aliases().toList().filterNot { it.contains("root_csp") }
-            val certificatesJSON = ArrayList<JSONObject>()
+        val keyStore = KeyStore.getInstance(JCSP.HD_STORE_NAME, JCSP.PROVIDER_NAME)
+        keyStore.load(null, null)
+        val aliases = keyStore.aliases().toList().filterNot { it.contains("root_csp") }
+        val certificatesJSON = ArrayList<JSONObject>()
 
-            for (alias in aliases) {
-                val certificate = keyStore.getCertificate(alias) as X509Certificate
-                val certificateJSON = getJSONCertificate(alias, certificate)
-                certificatesJSON.add(certificateJSON)
-            }
-
-            val response = JSONObject()
-            response.put("success", true)
-            response.put("certificates", JSONArray(certificatesJSON))
-            return response
-        } catch (e: Exception) {
-            return getErrorResponse("Произошла непредвиденная ошибка", e)
+        for (alias in aliases) {
+            val certificate = keyStore.getCertificate(alias) as X509Certificate
+            val certificateJSON = getJSONCertificate(alias, certificate)
+            certificatesJSON.add(certificateJSON)
         }
+
+        val response = JSONObject()
+        response.put("success", true)
+        response.put("certificates", JSONArray(certificatesJSON))
+        return response
     }
 
     /** Получаем JSON-модель по сертификату и алиасу */
@@ -322,14 +295,5 @@ class CryptoProModule {
             if (keyStore.isKeyEntry(alias)) return alias
         }
         throw NoPrivateKeyFound()
-    }
-
-    @Throws(JSONException::class)
-    private fun getErrorResponse(message: String, e: Exception): JSONObject {
-        val response = JSONObject()
-        response.put("success", false)
-        response.put("message", message)
-        response.put("exception", e)
-        return response
     }
 }

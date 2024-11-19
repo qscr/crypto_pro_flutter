@@ -78,7 +78,7 @@ class CryptoProFlutterPlugin: FlutterPlugin, MethodCallHandler {
           }
         }
       } catch (e: Exception) {
-        result.error("error", "Произошла ошибка при выполнении метода " + call.method, e);
+        result.error("error", e.message, e);
       }
     } else {
       result.error("nullContext", "Не удалось получить контекст", null)

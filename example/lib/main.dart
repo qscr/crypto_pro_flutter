@@ -1,12 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
-import 'package:crypto_pro_flutter/models/certificate.dart';
+import 'package:crypto_pro_flutter/crypto_pro_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
-
 import 'package:flutter/services.dart';
-import 'package:crypto_pro_flutter/crypto_pro_flutter.dart';
 
 void main() {
   runApp(const MyApp());
@@ -68,71 +66,57 @@ class _MyAppState extends State<MyApp> {
             children: [
               ElevatedButton(
                 onPressed: () async {
-                  FilePickerResult? result = await FilePicker.platform.pickFiles();
+                  FilePickerResult? result =
+                      await FilePicker.platform.pickFiles();
                   if (result?.isSinglePick ?? false) {
                     final file = File(result!.files.single.path!);
-                    final ad = await _cryptoProFlutterPlugin.addPfxCertificate(file, "12345678");
+                    await _cryptoProFlutterPlugin.addPfxCertificate(
+                      file,
+                      "11111111",
+                    );
                   }
                 },
                 child: const Text("Добавить сертификат"),
               ),
               ElevatedButton(
                 onPressed: () async {
-                  final list = await _cryptoProFlutterPlugin.getInstalledCertificates();
-                  final ad = await _cryptoProFlutterPlugin.deleteCertificate(list.first);
+                  final list =
+                      await _cryptoProFlutterPlugin.getInstalledCertificates();
+                  await _cryptoProFlutterPlugin.deleteCertificate(list.first);
                 },
                 child: const Text("Удалить сертификат"),
               ),
               ElevatedButton(
                 onPressed: () async {
-                  final list = await _cryptoProFlutterPlugin.getInstalledCertificates();
-                  print(list);
+                  final list =
+                      await _cryptoProFlutterPlugin.getInstalledCertificates();
                 },
                 child: const Text("Получить установленные сертификаты"),
               ),
               ElevatedButton(
                 onPressed: () async {
-                  FilePickerResult? result = await FilePicker.platform.pickFiles();
+                  FilePickerResult? result =
+                      await FilePicker.platform.pickFiles();
                   if (result?.isSinglePick ?? false) {
-                    final list = await _cryptoProFlutterPlugin.getInstalledCertificates();
+                    final list = await _cryptoProFlutterPlugin
+                        .getInstalledCertificates();
                     final file = File(result!.files.single.path!);
                     final sign = await _cryptoProFlutterPlugin.signFile(
                       file: file,
                       certificate: list.first,
                       password: "12345678",
                     );
-                    print(sign);
                   }
                 },
                 child: const Text("Подписать файл"),
               ),
-              // ElevatedButton(
-              //   onPressed: () async {
-              //     final list = await _cryptoProFlutterPlugin.getInstalledCertificates();
-              //     final sign = await _cryptoProFlutterPlugin.signMessage(
-              //       message: "Тест",
-              //       certificate: list.first,
-              //       password: "12345678",
-              //     );
-              //     print(sign);
-              //   },
-              //   child: const Text("Подписать сообщение"),
-              // ),
               ElevatedButton(
                 onPressed: () async {
+                  final list =
+                      await _cryptoProFlutterPlugin.getInstalledCertificates();
                   final sign = await _cryptoProFlutterPlugin.signMessage(
                     message: "Тест",
-                    certificate: Certificate(
-                      alias: "alias",
-                      algorithm: null,
-                      issuer: null,
-                      oid: null,
-                      owner: null,
-                      serialNumber: null,
-                      validFrom: null,
-                      validTo: null,
-                      version: null,
-                    ),
+                    certificate: list.first,
                     password: "12345678",
                   );
                   print(sign);
