@@ -5,6 +5,11 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'crypto_pro_flutter_method_channel.dart';
 
+enum CAdESFormat {
+  BES,
+  XLongType1,
+}
+
 abstract class CryptoProFlutterPlatform extends PlatformInterface {
   /// Constructs a CryptoProFlutterPlatform.
   CryptoProFlutterPlatform() : super(token: _token);
@@ -43,7 +48,8 @@ abstract class CryptoProFlutterPlatform extends PlatformInterface {
 
   /// Получит список установленных сертификатов
   Future<List<Certificate>> getInstalledCertificates() {
-    throw UnimplementedError('getInstalledCertificates() has not been implemented.');
+    throw UnimplementedError(
+        'getInstalledCertificates() has not been implemented.');
   }
 
   /// Подписать файл
@@ -51,8 +57,10 @@ abstract class CryptoProFlutterPlatform extends PlatformInterface {
     required File file,
     required Certificate certificate,
     required String password,
+    required CAdESFormat format,
     bool isDetached = true,
     bool disableOnlineValidation = false,
+    String? tsaUrl,
   }) {
     throw UnimplementedError('signFile() has not been implemented.');
   }
@@ -62,9 +70,11 @@ abstract class CryptoProFlutterPlatform extends PlatformInterface {
     required String message,
     required Certificate certificate,
     required String password,
+    required CAdESFormat format,
     bool isDetached = true,
     bool signHash = false,
     bool disableOnlineValidation = false,
+    String? tsaUrl,
   }) {
     throw UnimplementedError('signMessage() has not been implemented.');
   }

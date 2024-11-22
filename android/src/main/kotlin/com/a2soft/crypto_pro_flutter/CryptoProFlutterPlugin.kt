@@ -8,6 +8,9 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /** CryptoProFlutterPlugin */
 class CryptoProFlutterPlugin: FlutterPlugin, MethodCallHandler {
@@ -57,8 +60,18 @@ class CryptoProFlutterPlugin: FlutterPlugin, MethodCallHandler {
             val password = call.argument<String>("password")
             val isDetached = call.argument<Boolean>("isDetached")
             val disableOnlineValidation = call.argument<Boolean>("disableOnlineValidation")
-            if (path != null && password != null && alias != null && isDetached != null && disableOnlineValidation != null) {
-              result.success(CryptoProModule.getInstance().signFile(path, alias, password, isDetached, disableOnlineValidation).toString())
+            val tsaUrl = call.argument<String>("tsaUrl")
+            val format = call.argument<String>("format")
+            val formatEnum = format?.let { CAdESFormat.valueOf(it) }
+            if (path != null && password != null && alias != null && isDetached != null && disableOnlineValidation != null && formatEnum != null) {
+              CoroutineScope(Dispatchers.IO).launch {
+                try {
+                  result.success(CryptoProModule.getInstance().signFile(path, alias, password, isDetached, disableOnlineValidation, formatEnum, tsaUrl).toString())
+                } catch (e: Exception) {
+                // Обрабатываем ошибки
+                result.error("error", e.message, e)
+                }
+              }
             } else {
               throw NullPointerException()
             }
@@ -70,8 +83,18 @@ class CryptoProFlutterPlugin: FlutterPlugin, MethodCallHandler {
             val isDetached = call.argument<Boolean>("isDetached")
             val signHash = call.argument<Boolean>("signHash")
             val disableOnlineValidation = call.argument<Boolean>("disableOnlineValidation")
-            if (message != null && password != null && alias != null && isDetached != null && signHash != null && disableOnlineValidation != null) {
-              result.success(CryptoProModule.getInstance().signMessage(message, alias, password, isDetached, signHash, disableOnlineValidation).toString())
+            val tsaUrl = call.argument<String>("tsaUrl")
+            val format = call.argument<String>("format")
+            val formatEnum = format?.let { CAdESFormat.valueOf(it) }
+            if (message != null && password != null && alias != null && isDetached != null && signHash != null && disableOnlineValidation != null && formatEnum != null) {
+              CoroutineScope(Dispatchers.IO).launch {
+                try {
+                  result.success(CryptoProModule.getInstance().signMessage(message, alias, password, isDetached, signHash, disableOnlineValidation, formatEnum, tsaUrl).toString())
+                } catch (e: Exception) {
+                  // Обрабатываем ошибки
+                  result.error("error", e.message, e)
+                }
+              }
             } else {
               throw NullPointerException()
             }

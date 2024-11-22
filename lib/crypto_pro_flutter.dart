@@ -12,7 +12,8 @@ class CryptoProFlutter {
 
   /// Добавить новый сертификат в формате Pfx
   Future<Certificate> addPfxCertificate(File file, String password) async {
-    return await CryptoProFlutterPlatform.instance.addCertificate(file, password);
+    return await CryptoProFlutterPlatform.instance
+        .addCertificate(file, password);
   }
 
   /// Удалить установленный сертификат
@@ -22,7 +23,8 @@ class CryptoProFlutter {
 
   /// Получит список установленных сертификатов
   Future<List<Certificate>> getInstalledCertificates() async {
-    final list = await CryptoProFlutterPlatform.instance.getInstalledCertificates();
+    final list =
+        await CryptoProFlutterPlatform.instance.getInstalledCertificates();
     return list;
   }
 
@@ -31,8 +33,10 @@ class CryptoProFlutter {
     required File file,
     required Certificate certificate,
     required String password,
+    required CAdESFormat format,
     bool isDetached = true,
     bool disableOnlineValidation = false,
+    String? tsaUrl,
   }) async {
     return await CryptoProFlutterPlatform.instance.signFile(
       file: file,
@@ -40,6 +44,8 @@ class CryptoProFlutter {
       password: password,
       isDetached: true,
       disableOnlineValidation: disableOnlineValidation,
+      format: format,
+      tsaUrl: tsaUrl,
     );
   }
 
@@ -48,9 +54,11 @@ class CryptoProFlutter {
     required String message,
     required Certificate certificate,
     required String password,
+    required CAdESFormat format,
     bool isDetached = true,
     bool signHash = false,
     bool disableOnlineValidation = false,
+    String? tsaUrl,
   }) async {
     return await CryptoProFlutterPlatform.instance.signMessage(
       message: message,
@@ -59,6 +67,8 @@ class CryptoProFlutter {
       isDetached: isDetached,
       signHash: signHash,
       disableOnlineValidation: disableOnlineValidation,
+      format: format,
+      tsaUrl: tsaUrl,
     );
   }
 }

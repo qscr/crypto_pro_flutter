@@ -3,6 +3,8 @@ package com.a2soft.crypto_pro_flutter
 import android.content.Context
 import com.a2soft.crypto_pro_flutter.exceptions.CustomWrongPasswordException
 import com.a2soft.crypto_pro_flutter.exceptions.NoPrivateKeyFound
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -133,23 +135,49 @@ class CryptoProModule {
     }
 
     /** Подписать файл */
-    fun signFile(filePathToSign: String, alias: String, password: String, detached: Boolean, disableOnlineValidation: Boolean) : JSONObject {
+    suspend fun signFile(
+        filePathToSign: String,
+        alias: String,
+        password: String,
+        detached: Boolean,
+        disableOnlineValidation: Boolean,
+        format: CAdESFormat,
+        tsaUrl: String? = null // URL TSA (опционально для CAdES-X Long Type 1)
+    ) : JSONObject = withContext(Dispatchers.IO) {
         val fileInputStream = FileInputStream(filePathToSign)
         val size = fileInputStream.available()
         val buffer = ByteArray(size)
         fileInputStream.read(buffer)
         fileInputStream.close()
 
-        return sign(buffer, alias, password, detached, false, disableOnlineValidation)
+        return@withContext sign(buffer, alias, password, detached, false, disableOnlineValidation, format, tsaUrl)
     }
 
     /** Подписать сообщение */
-    fun signMessage(contentToSign: String, alias: String, password: String, detached: Boolean, signHash: Boolean, disableOnlineValidation: Boolean) : JSONObject {
-        return sign(contentToSign.toByteArray(), alias, password, detached, signHash, disableOnlineValidation)
+    suspend fun signMessage(
+        contentToSign: String,
+        alias: String,
+        password: String,
+        detached: Boolean,
+        signHash: Boolean,
+        disableOnlineValidation: Boolean,
+        format: CAdESFormat,
+        tsaUrl: String? = null // URL TSA (опционально для CAdES-X Long Type 1)
+    ) : JSONObject = withContext(Dispatchers.IO) {
+        return@withContext sign(contentToSign.toByteArray(), alias, password, detached, signHash, disableOnlineValidation, format, tsaUrl)
     }
 
     /** Подписание массива байт */
-    private fun sign(contentToSign: ByteArray, alias: String, password: String, detached: Boolean, signHash: Boolean, disableOnlineValidation: Boolean) : JSONObject {
+    private suspend fun sign(
+        contentToSign: ByteArray,
+        alias: String,
+        password: String,
+        detached: Boolean,
+        signHash: Boolean,
+        disableOnlineValidation: Boolean,
+        format: CAdESFormat,
+        tsaUrl: String? = null // URL TSA (опционально для CAdES-X Long Type 1)
+    ) : JSONObject = withContext(Dispatchers.IO) {
         // Получаем из HDImage сертификат (которым будем подписывать) с приватным ключем
         val keyStore = KeyStore.getInstance(JCSP.HD_STORE_NAME, JCSP.PROVIDER_NAME)
         keyStore.load(null, null)
@@ -165,20 +193,18 @@ class CryptoProModule {
             cAdESSignature.setOptions((Options()).disableCertificateValidation());
         }
 
-        val gfgThread = Thread {
-            try {
-                cAdESSignature.addSigner(
-                    JCSP.PROVIDER_NAME, null, null, privateKey, chain,
-                    CAdESType.CAdES_BES, null, false, null, null, null,
-                    true
-                )
-            } catch (e: Exception) {
-                throw e
-            }
+        // Настраиваем параметры для подписания в зависимости от формата
+        val tsaSeverUrl = if (format == CAdESFormat.XLongType1 && tsaUrl != null) tsaUrl else null
+        val cadesType = when (format) {
+            CAdESFormat.BES -> CAdESType.CAdES_BES
+            CAdESFormat.XLongType1 -> CAdESType.CAdES_X_Long_Type_1
         }
 
-        gfgThread.start()
-        gfgThread.join();
+        cAdESSignature.addSigner(
+            JCSP.PROVIDER_NAME, null, null, privateKey, chain,
+            cadesType, tsaSeverUrl, false, null, null, null,
+            true
+        )
 
         val signatureStream = ByteArrayOutputStream()
 
@@ -195,7 +221,7 @@ class CryptoProModule {
         val response = JSONObject()
         response.put("success", true)
         response.put("signBase64", base64)
-        return response
+        return@withContext response
     }
 
 

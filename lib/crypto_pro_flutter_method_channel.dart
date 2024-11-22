@@ -57,8 +57,10 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
     required File file,
     required Certificate certificate,
     required String password,
+    required CAdESFormat format,
     bool isDetached = true,
     bool disableOnlineValidation = false,
+    String? tsaUrl,
   }) async {
     String response = await methodChannel.invokeMethod(
       "signFile",
@@ -68,6 +70,8 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
         "password": password,
         "isDetached": isDetached,
         "disableOnlineValidation": disableOnlineValidation,
+        "format": format.name,
+        "tsaUrl": tsaUrl,
       },
     );
     Map<String, dynamic> map = json.decode(response);
@@ -79,9 +83,11 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
     required String message,
     required Certificate certificate,
     required String password,
+    required CAdESFormat format,
     bool isDetached = true,
     bool signHash = false,
     bool disableOnlineValidation = false,
+    String? tsaUrl,
   }) async {
     String response = await methodChannel.invokeMethod(
       "signMessage",
@@ -92,6 +98,8 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
         "isDetached": isDetached,
         "signHash": signHash,
         "disableOnlineValidation": disableOnlineValidation,
+        "format": format.name,
+        "tsaUrl": tsaUrl,
       },
     );
     Map<String, dynamic> map = json.decode(response);

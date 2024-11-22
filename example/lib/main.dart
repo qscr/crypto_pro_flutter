@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:crypto_pro_flutter/crypto_pro_flutter.dart';
+import 'package:crypto_pro_flutter/crypto_pro_flutter_platform_interface.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -104,8 +105,11 @@ class _MyAppState extends State<MyApp> {
                     final sign = await _cryptoProFlutterPlugin.signFile(
                       file: file,
                       certificate: list.first,
-                      password: "12345678",
+                      password: "11111111",
+                      format: CAdESFormat.XLongType1,
+                      tsaUrl: "http://ssca.rosatom.ru/TSPQ/tsp.srf",
                     );
+                    print(sign);
                   }
                 },
                 child: const Text("Подписать файл"),
@@ -118,6 +122,7 @@ class _MyAppState extends State<MyApp> {
                     message: "Тест",
                     certificate: list.first,
                     password: "12345678",
+                    format: CAdESFormat.BES,
                   );
                   print(sign);
                 },
