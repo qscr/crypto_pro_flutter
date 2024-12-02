@@ -1,18 +1,21 @@
 # Плагин для формирования электронной подписи формата CADES-BES с помощью нативных SDK Crypto Pro
 
-## __Описание__
-Плагин принимает сертификаты в формате __PKCS12__ ```.pfx```
+## **Описание**
+
+Плагин принимает ключевые контейнеры в формате **PKCS12** `.pfx`. Есть возможность интеграции с внешними ключевыми контейнерами (например, Рутокен)
 
 Приватный ключ должен быть помечен как экспортируемый
 
 Пока Android Only
 
+## **Установка**
 
-## __Установка__
-### __Подключение плагина к Android проекту__
-1. Скопировать ```.aar``` библиотеки из ```android/libs``` плагина к себе в проект в ```android\app\libs```
+### **Подключение плагина к Android проекту**
 
-2. Добавить в ```build.gradle```
+1. Скопировать `.aar` библиотеки из `android/libs` плагина к себе в проект в `android\app\libs`
+
+2. Добавить в `build.gradle`
+
 ```gradle
 minSdkVersion 24
 
@@ -35,53 +38,72 @@ dependencies {
 }
 ```
 
-3. Создать файл ```proguard-rules.pro``` в ```android/app```
+3. Создать файл `proguard-rules.pro` в `android/app`
+
 ```pro
 -keep public class ru.CryptoPro.*
 ```
 
 Библиотеки .aar указаны в плагине как compile-only, так как невозможно к .aar (коим является этот плагин) подключать другие .aar, для этого требуется скопировать их к себе в проект и подключить как implementation. Proguard используется, чтобы запретить обфускацию кода, которая происходить при выполнении релизной сборки.
 
-## __Использование__
+## **Использование**
 
-* Инициализировать провайдер
-    ```dart
-    CryptoProFlutter.initCSP()
-    ```
-* Добавить Pfx-сертификат в хранилище
-    ```dart
-    CryptoProFlutter.addPfxCertificate(File file, String password)
-    ```
-* Получить список сертификатов, добавленных пользователем
-    ```dart
-    CryptoProFlutter.getInstalledCertificates()
-    ```
-* Удалить добавленный сертификат
-    ```dart
-    CryptoProFlutter.deleteCertificate(Certificate certificate)
-    ```
-* Подписать файл
-    ```dart
-    CryptoProFlutter.signFile(
-        required File file,
-        required Certificate certificate,
-        required String password,
-        bool isDetached = true,
-        bool disableOnlineValidation = false,
-    )
-    ```
-* Подписать сообщение
-    ```dart
-    CryptoProFlutter.signMessage({
-        required String message,
-        required Certificate certificate,
-        required String password,
-        bool isDetached = true,
-        bool signHash = false,
-        bool signHash = false,
-        bool disableOnlineValidation = false,
-    })
-    ```
+- Инициализировать провайдер
+  ```dart
+  CryptoProFlutter.initCSP()
+  ```
+- Добавить Pfx-контейнер в хранилище
+  ```dart
+  CryptoProFlutter.addPfxCertificate(File file, String password, String newPassword)
+  ```
+- Получить список сертификатов, добавленных пользователем
+  ```dart
+  CryptoProFlutter.getInstalledCertificates()
+  ```
+- Удалить добавленный сертификат
+  ```dart
+  CryptoProFlutter.deleteCertificate(Certificate certificate)
+  ```
+- Подписать файл
+  ```dart
+  CryptoProFlutter.signFile(
+      required File file,
+      required Certificate certificate,
+      required String password,
+      required CAdESFormat format,
+      bool isDetached = true,
+      bool disableOnlineValidation = false,
+      String? tsaUrl,
+  )
+  ```
+- Подписать сообщение
+  ```dart
+  CryptoProFlutter.signMessage({
+      required String message,
+      required Certificate certificate,
+      required String password,
+      required CAdESFormat format,
+      bool isDetached = true,
+      bool signHash = false,
+      bool disableOnlineValidation = false,
+      String? tsaUrl,
+  })
+  ```
+- Добавить внешний контейнер в хранилище
+  ```dart
+  CryptoProFlutter.addContainerFromExternalStorage({
+      required String storageName,
+      required String password,
+      String? newPassword,
+  })
+  ```
+- Добавить сертификаты в хранилище доверенных приложения
+  ```dart
+  CryptoProFlutter.addCertificatesToTrustedStorage({
+      required List<String> paths,
+  })
+  ```
 
 ## Todo
- - [x] Поддержка iOS
+
+- [x] Поддержка iOS
