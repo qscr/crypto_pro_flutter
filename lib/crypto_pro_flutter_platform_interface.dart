@@ -37,7 +37,27 @@ abstract class CryptoProFlutterPlatform extends PlatformInterface {
   }
 
   /// Добавить новый сертификат в формате Pfx
-  Future<Certificate> addCertificate(File file, String password) {
+  Future<Certificate> addCertificate({
+    required File file,
+    required String password,
+    String? newPassword,
+  }) {
+    throw UnimplementedError('addCertificate() has not been implemented.');
+  }
+
+  /// Добавить внешний контейнер в хранилище
+  Future<Certificate> addContainerFromExternalStorage({
+    required String storageName,
+    required String password,
+    String? newPassword,
+  }) {
+    throw UnimplementedError('addCertificate() has not been implemented.');
+  }
+
+  /// Добавить сертификаты в хранилище доверенных приложения
+  Future<void> addCertificatesToTrustedStorage({
+    required List<String> paths,
+  }) {
     throw UnimplementedError('addCertificate() has not been implemented.');
   }
 

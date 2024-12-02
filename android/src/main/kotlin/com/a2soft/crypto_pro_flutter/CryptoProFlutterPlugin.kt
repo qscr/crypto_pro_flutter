@@ -2,12 +2,14 @@ package com.a2soft.crypto_pro_flutter
 
 import android.content.Context
 import androidx.annotation.NonNull
+import com.a2soft.crypto_pro_flutter.exceptions.ArgumentsParsingException
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,30 +30,67 @@ class CryptoProFlutterPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
+    val exceptionHandler = CoroutineExceptionHandler { _, e ->
+      result.error("error", e.message, e);
+    }
+    val scope = CoroutineScope(Dispatchers.IO + exceptionHandler)
+    val instance = CryptoProModule.getInstance()
     if (context != null) {
       try {
         when (call.method) {
           "initCSP" -> {
-            result.success(CryptoProModule.getInstance().initCSP(context!!))
+            scope.launch {
+              result.success(instance.initCSP(context!!))
+            }
           }
           "addPfxCertificate" -> {
             val path = call.argument<String>("path")
             val password = call.argument<String>("password")
+            val newPassword = call.argument<String?>("newPassword")
             if (path != null && password != null) {
-              result.success(CryptoProModule.getInstance().addPfxCertificate(path, password, context!!).toString())
+              scope.launch {
+                result.success(instance.addPfxCertificate(path, password, newPassword).toString())
+              }
             } else {
-              throw NullPointerException()
+              throw ArgumentsParsingException()
+            }
+          }
+          "addFromExternalStorage" -> {
+            val storageName = call.argument<String>("storageName")
+            val password = call.argument<String>("password")
+            val newPassword = call.argument<String?>("newPassword")
+            if (storageName != null && password != null) {
+              scope.launch {
+                result.success(instance.addFromExternalStorage(storageName, password, newPassword).toString())
+              }
+            } else {
+              throw ArgumentsParsingException()
+            }
+          }
+          "addCertificatesToTrustedStorage" -> {
+            val paths = call.argument<List<String>>("paths")
+            if (paths != null) {
+              scope.launch {
+                instance.addCertificatesToTrustedStorage(paths)
+                result.success("Сертификаты успешно добавлены")
+              }
+            } else {
+              throw ArgumentsParsingException()
             }
           }
           "getInstalledCertificates" -> {
-            result.success(CryptoProModule.getInstance().getInstalledCertificates().toString())
+            scope.launch {
+              result.success(CryptoProModule.getInstance().getInstalledCertificates().toString())
+            }
           }
           "deletePfxCertificate" -> {
             val alias = call.argument<String>("alias")
             if (alias != null) {
-              result.success(CryptoProModule.getInstance().deletePfxCertificate(alias).toString())
+              scope.launch {
+                result.success(CryptoProModule.getInstance().deleteCertificateFromInternalStorage(alias).toString())
+              }
             } else {
-              throw NullPointerException()
+              throw ArgumentsParsingException()
             }
           }
           "signFile" -> {
@@ -64,16 +103,11 @@ class CryptoProFlutterPlugin: FlutterPlugin, MethodCallHandler {
             val format = call.argument<String>("format")
             val formatEnum = format?.let { CAdESFormat.valueOf(it) }
             if (path != null && password != null && alias != null && isDetached != null && disableOnlineValidation != null && formatEnum != null) {
-              CoroutineScope(Dispatchers.IO).launch {
-                try {
-                  result.success(CryptoProModule.getInstance().signFile(path, alias, password, isDetached, disableOnlineValidation, formatEnum, tsaUrl).toString())
-                } catch (e: Exception) {
-                // Обрабатываем ошибки
-                result.error("error", e.message, e)
-                }
+              scope.launch {
+                result.success(CryptoProModule.getInstance().signFile(path, alias, password, isDetached, disableOnlineValidation, formatEnum, tsaUrl).toString())
               }
             } else {
-              throw NullPointerException()
+              throw ArgumentsParsingException()
             }
           }
           "signMessage" -> {
@@ -87,16 +121,11 @@ class CryptoProFlutterPlugin: FlutterPlugin, MethodCallHandler {
             val format = call.argument<String>("format")
             val formatEnum = format?.let { CAdESFormat.valueOf(it) }
             if (message != null && password != null && alias != null && isDetached != null && signHash != null && disableOnlineValidation != null && formatEnum != null) {
-              CoroutineScope(Dispatchers.IO).launch {
-                try {
-                  result.success(CryptoProModule.getInstance().signMessage(message, alias, password, isDetached, signHash, disableOnlineValidation, formatEnum, tsaUrl).toString())
-                } catch (e: Exception) {
-                  // Обрабатываем ошибки
-                  result.error("error", e.message, e)
-                }
+              scope.launch {
+                result.success(CryptoProModule.getInstance().signMessage(message, alias, password, isDetached, signHash, disableOnlineValidation, formatEnum, tsaUrl).toString())
               }
             } else {
-              throw NullPointerException()
+              throw ArgumentsParsingException()
             }
           }
         }

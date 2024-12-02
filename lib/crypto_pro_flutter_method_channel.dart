@@ -19,12 +19,17 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
   }
 
   @override
-  Future<Certificate> addCertificate(File file, String password) async {
+  Future<Certificate> addCertificate({
+    required File file,
+    required String password,
+    String? newPassword,
+  }) async {
     String response = await methodChannel.invokeMethod(
       "addPfxCertificate",
       {
         "path": file.path,
         "password": password,
+        "newPassword": newPassword,
       },
     );
     Map<String, dynamic> map = json.decode(response) as Map<String, dynamic>;
@@ -52,6 +57,26 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
     return certificatesMaps.map((e) => Certificate.fromMap(e)).toList();
   }
 
+  /// Добавить внешний контейнер в хранилище
+  @override
+  Future<Certificate> addContainerFromExternalStorage({
+    required String storageName,
+    required String password,
+    String? newPassword,
+  }) async {
+    String response = await methodChannel.invokeMethod(
+      "addFromExternalStorage",
+      {
+        "storageName": storageName,
+        "password": password,
+        "newPassword": newPassword,
+      },
+    );
+    Map<String, dynamic> map = json.decode(response) as Map<String, dynamic>;
+    final certificate = Certificate.fromMap(map["certificate"]);
+    return certificate;
+  }
+
   @override
   Future<String> signFile({
     required File file,
@@ -76,6 +101,19 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
     );
     Map<String, dynamic> map = json.decode(response);
     return map["signBase64"] as String;
+  }
+
+  /// Добавить сертификаты в хранилище доверенных приложения
+  @override
+  Future<void> addCertificatesToTrustedStorage({
+    required List<String> paths,
+  }) async {
+    await methodChannel.invokeMethod(
+      "addCertificatesToTrustedStorage",
+      {
+        "paths": paths,
+      },
+    );
   }
 
   @override

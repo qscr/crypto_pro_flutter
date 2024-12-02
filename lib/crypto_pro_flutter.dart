@@ -10,10 +10,40 @@ class CryptoProFlutter {
     return CryptoProFlutterPlatform.instance.initCSP();
   }
 
-  /// Добавить новый сертификат в формате Pfx
-  Future<Certificate> addPfxCertificate(File file, String password) async {
+  /// Добавить сертификаты в хранилище доверенных приложения
+  Future<void> addCertificatesToTrustedStorage({
+    required List<String> paths,
+  }) async {
+    return CryptoProFlutterPlatform.instance.addCertificatesToTrustedStorage(
+      paths: paths,
+    );
+  }
+
+  /// Добавить внешний контейнер в хранилище
+  Future<Certificate> addContainerFromExternalStorage({
+    required String storageName,
+    required String password,
+    String? newPassword,
+  }) async {
     return await CryptoProFlutterPlatform.instance
-        .addCertificate(file, password);
+        .addContainerFromExternalStorage(
+      storageName: storageName,
+      password: password,
+      newPassword: newPassword,
+    );
+  }
+
+  /// Добавить новый сертификат в формате Pfx
+  Future<Certificate> addPfxCertificate({
+    required File file,
+    required String password,
+    String? newPassword,
+  }) async {
+    return await CryptoProFlutterPlatform.instance.addCertificate(
+      file: file,
+      password: password,
+      newPassword: newPassword,
+    );
   }
 
   /// Удалить установленный сертификат

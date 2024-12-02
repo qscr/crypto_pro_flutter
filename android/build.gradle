@@ -2,14 +2,14 @@ group 'com.a2soft.crypto_pro_flutter'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.6.10'
+    ext.kotlin_version = '1.7.10'
     repositories {
         google()
         mavenCentral()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.1'
+        classpath 'com.android.tools.build:gradle:7.2.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -25,8 +25,6 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 31
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -41,19 +39,20 @@ android {
     }
 
     defaultConfig {
+        compileSdk 34
         minSdkVersion 24
     }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
     compileOnly fileTree(dir: 'libs', include: ['*.aar'])
-    implementation 'org.bouncycastle:bcprov-jdk15on:1.60'
-    implementation 'org.bouncycastle:bcpkix-jdk15on:1.60'
-    implementation 'org.ini4j:ini4j:0.5.1'
+    implementation "org.bouncycastle:bcprov-jdk18on:1.73"
+    implementation "org.bouncycastle:bcpkix-jdk18on:1.73"
+    implementation 'org.ini4j:ini4j:0.5.4'
 
-    implementation 'com.google.android.material:material:1.4.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.databinding:viewbinding:8.7.2'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     testImplementation 'junit:junit:4.13.2'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
