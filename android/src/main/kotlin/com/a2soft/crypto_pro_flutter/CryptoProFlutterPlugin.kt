@@ -67,6 +67,17 @@ class CryptoProFlutterPlugin: FlutterPlugin, MethodCallHandler {
               throw ArgumentsParsingException()
             }
           }
+          "readFromExternalStorage" -> {
+            val storageName = call.argument<String>("storageName")
+            val password = call.argument<String>("password")
+            if (storageName != null && password != null) {
+              scope.launch {
+                result.success(instance.readFromExternalStorage(storageName, password).toString())
+              }
+            } else {
+              throw ArgumentsParsingException()
+            }
+          }
           "addCertificatesToTrustedStorage" -> {
             val paths = call.argument<List<String>>("paths")
             if (paths != null) {

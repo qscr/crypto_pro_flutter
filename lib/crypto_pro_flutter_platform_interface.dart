@@ -54,6 +54,14 @@ abstract class CryptoProFlutterPlatform extends PlatformInterface {
     throw UnimplementedError('addCertificate() has not been implemented.');
   }
 
+  /// Получить сертификат с приватным ключом из внешнего контейнера
+  Future<Certificate> readContainerFromExternalStorage({
+    required String storageName,
+    required String password,
+  }) {
+    throw UnimplementedError('addCertificate() has not been implemented.');
+  }
+
   /// Добавить сертификаты в хранилище доверенных приложения
   Future<void> addCertificatesToTrustedStorage({
     required List<String> paths,
@@ -81,6 +89,7 @@ abstract class CryptoProFlutterPlatform extends PlatformInterface {
     bool isDetached = true,
     bool disableOnlineValidation = false,
     String? tsaUrl,
+    String? storageName,
   }) {
     throw UnimplementedError('signFile() has not been implemented.');
   }
@@ -95,6 +104,7 @@ abstract class CryptoProFlutterPlatform extends PlatformInterface {
     bool signHash = false,
     bool disableOnlineValidation = false,
     String? tsaUrl,
+    String? storageName,
   }) {
     throw UnimplementedError('signMessage() has not been implemented.');
   }

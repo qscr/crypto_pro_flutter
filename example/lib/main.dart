@@ -125,6 +125,20 @@ class _MyAppState extends State<MyApp> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
+                    final certs = await _cryptoProFlutterPlugin
+                        .readContainerFromExternalStorage(
+                      storageName: 'Aktiv Rutoken ECP 1',
+                      password: '11111111',
+                    );
+                    print(certs);
+                  },
+                  child: const Text(
+                    "Получить сертификаты из внешнего хранилища",
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
                     final list = await _cryptoProFlutterPlugin
                         .getInstalledCertificates();
                     await _cryptoProFlutterPlugin.deleteCertificate(list.first);

@@ -77,6 +77,25 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
     return certificate;
   }
 
+  /// Получить сертификат с приватным ключом из внешнего контейнера
+  @override
+  Future<Certificate> readContainerFromExternalStorage({
+    required String storageName,
+    required String password,
+    String? newPassword,
+  }) async {
+    String response = await methodChannel.invokeMethod(
+      "readFromExternalStorage",
+      {
+        "storageName": storageName,
+        "password": password,
+      },
+    );
+    Map<String, dynamic> map = json.decode(response) as Map<String, dynamic>;
+    final certificate = Certificate.fromMap(map["certificate"]);
+    return certificate;
+  }
+
   @override
   Future<String> signFile({
     required File file,
@@ -86,6 +105,7 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
     bool isDetached = true,
     bool disableOnlineValidation = false,
     String? tsaUrl,
+    String? storageName,
   }) async {
     String response = await methodChannel.invokeMethod(
       "signFile",
@@ -97,6 +117,7 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
         "disableOnlineValidation": disableOnlineValidation,
         "format": format.name,
         "tsaUrl": tsaUrl,
+        "storageName": storageName,
       },
     );
     Map<String, dynamic> map = json.decode(response);
@@ -126,6 +147,7 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
     bool signHash = false,
     bool disableOnlineValidation = false,
     String? tsaUrl,
+    String? storageName,
   }) async {
     String response = await methodChannel.invokeMethod(
       "signMessage",
@@ -138,6 +160,7 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
         "disableOnlineValidation": disableOnlineValidation,
         "format": format.name,
         "tsaUrl": tsaUrl,
+        "storageName": storageName,
       },
     );
     Map<String, dynamic> map = json.decode(response);

@@ -150,6 +150,7 @@ class CryptoProModule {
         detached: Boolean,
         disableOnlineValidation: Boolean,
         format: CAdESFormat,
+        storageName: String? = null,
         tsaUrl: String? = null // URL TSA (опционально для CAdES-X Long Type 1)
     ) : JSONObject {
         val fileInputStream = FileInputStream(filePathToSign)
@@ -170,6 +171,7 @@ class CryptoProModule {
         signHash: Boolean,
         disableOnlineValidation: Boolean,
         format: CAdESFormat,
+        storageName: String? = null,
         tsaUrl: String? = null // URL TSA (опционально для CAdES-X Long Type 1)
     ) : JSONObject {
         return sign(contentToSign.toByteArray(), alias, password, detached, signHash, disableOnlineValidation, format, tsaUrl)
@@ -184,11 +186,11 @@ class CryptoProModule {
         signHash: Boolean,
         disableOnlineValidation: Boolean,
         format: CAdESFormat,
+        storageName: String? = null,
         tsaUrl: String? = null // URL TSA (опционально для CAdES-X Long Type 1)
     ) : JSONObject {
-        listAllCertificatesInBks()
-        // Получаем из HDImage сертификат (которым будем подписывать) с приватным ключем
-        val keyStore = KeyStore.getInstance(JCSP.HD_STORE_NAME, JCSP.PROVIDER_NAME)
+        // Получаем из HDImage (или из storageName, если передан) сертификат (которым будем подписывать) с приватным ключем
+        val keyStore = KeyStore.getInstance(storageName ?: JCSP.HD_STORE_NAME, JCSP.PROVIDER_NAME)
         keyStore.load(null, null)
         val protectionParam = JCPProtectionParameter(password.toCharArray())
         val privateKeyEntry = keyStore.getEntry(alias, protectionParam as ProtectionParameter) as JCPPrivateKeyEntry
@@ -242,6 +244,31 @@ class CryptoProModule {
         keyStore.load(null,null)
         keyStore.load(fileInputStream, password.toCharArray())
         return addContainerFromStorage(keyStore, password, newPassword)
+    }
+
+    /** Получение внешнего контейнера по имени */
+    fun readFromExternalStorage(name: String, password: String): JSONObject {
+        val keyStore = KeyStore.getInstance(name, JCSP.PROVIDER_NAME)
+        keyStore.load(null,null)
+        return readContainerFromStorage(keyStore, password)
+    }
+
+    /** Получение сертификата с приватным ключом из контейнера */
+    private fun readContainerFromStorage(storage: KeyStore, password: String): JSONObject {
+        try {
+            // Получаем алиас сертификата с приватным ключем
+            val mainCertAlias: String = findPrivateKeyAlias(storage)
+            val protectionParam = PasswordProtection(password.toCharArray())
+            val entry = storage.getEntry(mainCertAlias, protectionParam) as JCPPrivateKeyEntry
+            val certificate = entry.certificate as X509Certificate
+
+            val response = JSONObject()
+            response.put("success", true)
+            response.put("certificate", getJSONCertificate(mainCertAlias, certificate))
+            return response
+        } catch (e: WrongPasswordException) {
+            throw CustomWrongPasswordException()
+        }
     }
 
     /** Добавление внешнего контейнера по имени */

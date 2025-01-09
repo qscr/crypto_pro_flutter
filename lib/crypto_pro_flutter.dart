@@ -33,7 +33,19 @@ class CryptoProFlutter {
     );
   }
 
-  /// Добавить новый сертификат в формате Pfx
+  /// Получить сертификат с приватным ключом из внешнего контейнера
+  Future<Certificate> readContainerFromExternalStorage({
+    required String storageName,
+    required String password,
+  }) async {
+    return await CryptoProFlutterPlatform.instance
+        .readContainerFromExternalStorage(
+      storageName: storageName,
+      password: password,
+    );
+  }
+
+  /// Добавить новый сертификат в формате Pfx в хранилище приложения
   Future<Certificate> addPfxCertificate({
     required File file,
     required String password,
@@ -46,12 +58,12 @@ class CryptoProFlutter {
     );
   }
 
-  /// Удалить установленный сертификат
+  /// Удалить установленный сертификат из хранилища приложения
   Future<void> deleteCertificate(Certificate certificate) async {
     await CryptoProFlutterPlatform.instance.deleteCertificate(certificate);
   }
 
-  /// Получит список установленных сертификатов
+  /// Получит список установленных сертификатов в хранилище приложения
   Future<List<Certificate>> getInstalledCertificates() async {
     final list =
         await CryptoProFlutterPlatform.instance.getInstalledCertificates();
@@ -67,6 +79,7 @@ class CryptoProFlutter {
     bool isDetached = true,
     bool disableOnlineValidation = false,
     String? tsaUrl,
+    String? storageName,
   }) async {
     return await CryptoProFlutterPlatform.instance.signFile(
       file: file,
@@ -76,6 +89,7 @@ class CryptoProFlutter {
       disableOnlineValidation: disableOnlineValidation,
       format: format,
       tsaUrl: tsaUrl,
+      storageName: storageName,
     );
   }
 
@@ -89,6 +103,7 @@ class CryptoProFlutter {
     bool signHash = false,
     bool disableOnlineValidation = false,
     String? tsaUrl,
+    String? storageName,
   }) async {
     return await CryptoProFlutterPlatform.instance.signMessage(
       message: message,
@@ -99,6 +114,7 @@ class CryptoProFlutter {
       disableOnlineValidation: disableOnlineValidation,
       format: format,
       tsaUrl: tsaUrl,
+      storageName: storageName,
     );
   }
 }
