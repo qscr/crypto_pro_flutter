@@ -78,6 +78,17 @@ class CryptoProFlutterPlugin: FlutterPlugin, MethodCallHandler {
               throw ArgumentsParsingException()
             }
           }
+          "getPrivateKeyFromInternalContainerByAlias" -> {
+            val certificateAlias = call.argument<String>("alias")
+            val password = call.argument<String>("password")
+            if (certificateAlias != null && password != null) {
+              scope.launch {
+                result.success(instance.getPrivateKeyFromInternalContainerByAlias(certificateAlias, password).toString())
+              }
+            } else {
+              throw ArgumentsParsingException()
+            }
+          }
           "addCertificatesToTrustedStorage" -> {
             val paths = call.argument<List<String>>("paths")
             if (paths != null) {

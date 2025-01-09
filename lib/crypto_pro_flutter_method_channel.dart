@@ -57,6 +57,24 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
     return certificatesMaps.map((e) => Certificate.fromMap(e)).toList();
   }
 
+  /// Получить сертификат с приватным ключом из внутреннего хранилища приложения
+  @override
+  Future<Certificate> getPrivateKeyFromInternalContainerByAlias({
+    required String certificateAlias,
+    required String password,
+  }) async {
+    String response = await methodChannel.invokeMethod(
+      "getPrivateKeyFromInternalContainerByAlias",
+      {
+        "alias": certificateAlias,
+        "password": password,
+      },
+    );
+    Map<String, dynamic> map = json.decode(response) as Map<String, dynamic>;
+    final certificate = Certificate.fromMap(map["certificate"]);
+    return certificate;
+  }
+
   /// Добавить внешний контейнер в хранилище
   @override
   Future<Certificate> addContainerFromExternalStorage({

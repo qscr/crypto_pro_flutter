@@ -253,6 +253,13 @@ class CryptoProModule {
         return readContainerFromStorage(keyStore, password)
     }
 
+    /** Получение приватного ключа сертификата по имени из внутреннего хранилища */
+    fun getPrivateKeyFromInternalContainerByAlias(alias: String, password: String): JSONObject {
+        val keyStore = KeyStore.getInstance(JCSP.HD_STORE_NAME, JCSP.PROVIDER_NAME)
+        keyStore.load(null,null)
+        return readContainerFromStorage(keyStore, password)
+    }
+
     /** Получение сертификата с приватным ключом из контейнера */
     private fun readContainerFromStorage(storage: KeyStore, password: String): JSONObject {
         try {

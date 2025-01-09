@@ -54,6 +54,14 @@ abstract class CryptoProFlutterPlatform extends PlatformInterface {
     throw UnimplementedError('addCertificate() has not been implemented.');
   }
 
+  /// Получить сертификат с приватным ключом из внутреннего хранилища приложения
+  Future<Certificate> getPrivateKeyFromInternalContainerByAlias({
+    required String certificateAlias,
+    required String password,
+  }) async {
+    throw UnimplementedError('addCertificate() has not been implemented.');
+  }
+
   /// Получить сертификат с приватным ключом из внешнего контейнера
   Future<Certificate> readContainerFromExternalStorage({
     required String storageName,
