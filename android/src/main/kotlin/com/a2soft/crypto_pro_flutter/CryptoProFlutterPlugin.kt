@@ -89,6 +89,16 @@ class CryptoProFlutterPlugin: FlutterPlugin, MethodCallHandler {
               throw ArgumentsParsingException()
             }
           }
+          "removeCertificateWithPrivateKeyFromStorage" -> {
+            val certificateAlias = call.argument<String>("alias")
+            if (certificateAlias != null) {
+              scope.launch {
+                result.success(instance.removeCertificateWithPrivateKeyFromStorage(certificateAlias).toString())
+              }
+            } else {
+              throw ArgumentsParsingException()
+            }
+          }
           "addCertificatesToTrustedStorage" -> {
             val paths = call.argument<List<String>>("paths")
             if (paths != null) {

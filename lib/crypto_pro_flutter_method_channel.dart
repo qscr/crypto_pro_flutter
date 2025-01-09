@@ -75,6 +75,19 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
     return certificate;
   }
 
+  /// Удаление сертификата и приватного ключа из внутреннего хранилища
+  @override
+  Future<void> removeCertificateWithPrivateKeyFromStorage({
+    required String certificateAlias,
+  }) async {
+    await methodChannel.invokeMethod(
+      "removeCertificateWithPrivateKeyFromStorage",
+      {
+        "alias": certificateAlias,
+      },
+    );
+  }
+
   /// Добавить внешний контейнер в хранилище
   @override
   Future<Certificate> addContainerFromExternalStorage({

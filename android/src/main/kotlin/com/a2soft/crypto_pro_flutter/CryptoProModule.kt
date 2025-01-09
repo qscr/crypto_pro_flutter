@@ -159,7 +159,7 @@ class CryptoProModule {
         fileInputStream.read(buffer)
         fileInputStream.close()
 
-        return sign(buffer, alias, password, detached, false, disableOnlineValidation, format, tsaUrl)
+        return sign(buffer, alias, password, detached, false, disableOnlineValidation, format, storageName, tsaUrl)
     }
 
     /** Подписать сообщение */
@@ -174,7 +174,7 @@ class CryptoProModule {
         storageName: String? = null,
         tsaUrl: String? = null // URL TSA (опционально для CAdES-X Long Type 1)
     ) : JSONObject {
-        return sign(contentToSign.toByteArray(), alias, password, detached, signHash, disableOnlineValidation, format, tsaUrl)
+        return sign(contentToSign.toByteArray(), alias, password, detached, signHash, disableOnlineValidation, format, storageName, tsaUrl)
     }
 
     /** Подписание массива байт */
@@ -258,6 +258,17 @@ class CryptoProModule {
         val keyStore = KeyStore.getInstance(JCSP.HD_STORE_NAME, JCSP.PROVIDER_NAME)
         keyStore.load(null,null)
         return readContainerFromStorage(keyStore, password)
+    }
+
+    /** Удаление сертификата и приватного ключа из внутреннего хранилища */
+    fun removeCertificateWithPrivateKeyFromStorage(alias: String): JSONObject {
+        val keyStore = KeyStore.getInstance(JCSP.HD_STORE_NAME, JCSP.PROVIDER_NAME)
+        keyStore.load(null,null)
+        keyStore.deleteEntry(alias)
+
+        val response = JSONObject()
+        response.put("success", true)
+        return response
     }
 
     /** Получение сертификата с приватным ключом из контейнера */

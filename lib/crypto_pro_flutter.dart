@@ -57,6 +57,16 @@ class CryptoProFlutter {
     );
   }
 
+  /// Удаление сертификата и приватного ключа из внутреннего хранилища
+  Future<void> removeCertificateWithPrivateKeyFromStorage({
+    required String certificateAlias,
+  }) async {
+    return await CryptoProFlutterPlatform.instance
+        .removeCertificateWithPrivateKeyFromStorage(
+      certificateAlias: certificateAlias,
+    );
+  }
+
   /// Добавить новый сертификат в формате Pfx в хранилище приложения
   Future<Certificate> addPfxCertificate({
     required File file,
