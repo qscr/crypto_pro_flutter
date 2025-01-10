@@ -257,7 +257,18 @@ class CryptoProModule {
     fun getPrivateKeyFromInternalContainerByAlias(alias: String, password: String): JSONObject {
         val keyStore = KeyStore.getInstance(JCSP.HD_STORE_NAME, JCSP.PROVIDER_NAME)
         keyStore.load(null,null)
-        return readContainerFromStorage(keyStore, password)
+        try {
+            val protectionParam = PasswordProtection(password.toCharArray())
+            val entry = keyStore.getEntry(alias, protectionParam) as JCPPrivateKeyEntry
+            val certificate = entry.certificate as X509Certificate
+
+            val response = JSONObject()
+            response.put("success", true)
+            response.put("certificate", getJSONCertificate(alias, certificate))
+            return response
+        } catch (e: WrongPasswordException) {
+            throw CustomWrongPasswordException()
+        }
     }
 
     /** Удаление сертификата и приватного ключа из внутреннего хранилища */

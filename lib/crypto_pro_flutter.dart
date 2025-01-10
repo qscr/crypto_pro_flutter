@@ -51,8 +51,8 @@ class CryptoProFlutter {
     required String password,
   }) async {
     return await CryptoProFlutterPlatform.instance
-        .readContainerFromExternalStorage(
-      storageName: certificateAlias,
+        .getPrivateKeyFromInternalContainerByAlias(
+      certificateAlias: certificateAlias,
       password: password,
     );
   }
