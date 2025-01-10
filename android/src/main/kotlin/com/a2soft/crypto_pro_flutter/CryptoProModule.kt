@@ -217,7 +217,7 @@ class CryptoProModule {
 
         cAdESSignature.addSigner(
             JCSP.PROVIDER_NAME, null, null, privateKey, chain,
-            cadesType, tsaSeverUrl, false, null, null
+            cadesType, tsaSeverUrl, false, null, null, null, true,
         )
 
         val signatureStream = ByteArrayOutputStream()
