@@ -3,6 +3,7 @@ package com.a2soft.crypto_pro_flutter
 import android.content.Context
 import androidx.annotation.NonNull
 import com.a2soft.crypto_pro_flutter.exceptions.ArgumentsParsingException
+import com.a2soft.crypto_pro_flutter.exceptions.CryptoProFlutterBaseException
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -31,7 +32,12 @@ class CryptoProFlutterPlugin: FlutterPlugin, MethodCallHandler {
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
     val exceptionHandler = CoroutineExceptionHandler { _, e ->
-      result.error("error", e.message, e);
+      if (e is CryptoProFlutterBaseException) {
+        result.error(e.code, e.message, e.stackTraceToString())
+        return@CoroutineExceptionHandler
+      }
+
+      result.error(e.javaClass.name, e.message, e.stackTraceToString())
     }
     val scope = CoroutineScope(Dispatchers.IO + exceptionHandler)
     val instance = CryptoProModule.getInstance()

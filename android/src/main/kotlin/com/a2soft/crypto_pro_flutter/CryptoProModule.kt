@@ -1,6 +1,7 @@
 package com.a2soft.crypto_pro_flutter
 
 import android.content.Context
+import com.a2soft.crypto_pro_flutter.exceptions.CertificateStatusUnknownOrRevokedException
 import com.a2soft.crypto_pro_flutter.exceptions.CustomWrongPasswordException
 import com.a2soft.crypto_pro_flutter.exceptions.NoPrivateKeyFound
 import com.a2soft.crypto_pro_flutter.exceptions.SomeCertificatesAreNotAddedToTrustStoreException
@@ -10,11 +11,13 @@ import ru.CryptoPro.AdES.AdESConfig
 import ru.CryptoPro.AdES.Options
 import ru.CryptoPro.CAdES.CAdESSignature
 import ru.CryptoPro.CAdES.CAdESType
+import ru.CryptoPro.CAdES.exception.CAdESException
 import ru.CryptoPro.JCP.KeyStore.JCPPrivateKeyEntry
 import ru.CryptoPro.JCP.params.JCPProtectionParameter
 import ru.CryptoPro.JCP.tools.Encoder
 import ru.CryptoPro.JCSP.CSPConfig
 import ru.CryptoPro.JCSP.JCSP
+import ru.CryptoPro.JCSP.params.JCSPGost2012AlgorithmParameters;
 import ru.CryptoPro.JCSP.exception.WrongPasswordException
 import ru.CryptoPro.JCSP.support.BKSTrustStore
 import ru.CryptoPro.reprov.RevCheck
@@ -215,10 +218,18 @@ class CryptoProModule {
             CAdESFormat.XLongType1 -> CAdESType.CAdES_X_Long_Type_1
         }
 
-        cAdESSignature.addSigner(
-            JCSP.PROVIDER_NAME, null, null, privateKey, chain,
-            cadesType, tsaSeverUrl, false, null, null, null, true,
-        )
+        try {
+            cAdESSignature.addSigner(
+                JCSP.PROVIDER_NAME, JCSP.GOST_CIPHER_NAME, null, privateKey, chain,
+                cadesType, tsaSeverUrl, false, null, null, null, true,
+            )
+        } catch (e: CAdESException) {
+            if (e.errorCode == 44) {
+                throw CertificateStatusUnknownOrRevokedException()
+            } else {
+                throw e
+            }
+        }
 
         val signatureStream = ByteArrayOutputStream()
 

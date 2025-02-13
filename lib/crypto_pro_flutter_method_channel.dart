@@ -2,13 +2,15 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto_pro_flutter/models/certificate.dart';
+import 'package:crypto_pro_flutter/utils/exception_handler_mixin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'crypto_pro_flutter_platform_interface.dart';
 
 /// An implementation of [CryptoProFlutterPlatform] that uses method channels.
-class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
+class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform
+    with ExceptionHandlerMixin {
   @visibleForTesting
   final methodChannel = const MethodChannel('crypto_pro_flutter');
 
@@ -138,21 +140,23 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform {
     String? tsaUrl,
     String? storageName,
   }) async {
-    String response = await methodChannel.invokeMethod(
-      "signFile",
-      {
-        "path": file.path,
-        "alias": certificate.alias,
-        "password": password,
-        "isDetached": isDetached,
-        "disableOnlineValidation": disableOnlineValidation,
-        "format": format.name,
-        "tsaUrl": tsaUrl,
-        "storageName": storageName,
-      },
-    );
-    Map<String, dynamic> map = json.decode(response);
-    return map["signBase64"] as String;
+    return callWithHandler(() async {
+      String response = await methodChannel.invokeMethod(
+        "signFile",
+        {
+          "path": file.path,
+          "alias": certificate.alias,
+          "password": password,
+          "isDetached": isDetached,
+          "disableOnlineValidation": disableOnlineValidation,
+          "format": format.name,
+          "tsaUrl": tsaUrl,
+          "storageName": storageName,
+        },
+      );
+      Map<String, dynamic> map = json.decode(response);
+      return map["signBase64"] as String;
+    });
   }
 
   /// Добавить сертификаты в хранилище доверенных приложения
