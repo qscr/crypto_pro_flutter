@@ -25,6 +25,8 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
+    namespace("com.a2soft.crypto_pro_flutter")
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -39,7 +41,7 @@ android {
     }
 
     defaultConfig {
-        compileSdk 34
+        compileSdk 35
         minSdkVersion 24
     }
 }
