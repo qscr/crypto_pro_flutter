@@ -8,3 +8,9 @@ class ArgumentsParsingException: CryptoProFlutterBaseException("Обязател
 class SomeCertificatesAreNotAddedToTrustStoreException(errorCertificateNames: Array<String>): CryptoProFlutterBaseException("Не удалось добавить следующие сертификаты: " + errorCertificateNames.joinToString(", "), "4")
 class CertificateStatusUnknownOrRevokedException: CryptoProFlutterBaseException("Не удалось проверить сертификат на отзыв", "5")
 
+class GetCertificateFromContainerException(container: String, message: String): CryptoProFlutterBaseException("Не удалось получить сертификат из контейнера $container \n$message", "6")
+
+class GetCertificatePrivateKeyException(message: String): CryptoProFlutterBaseException("Не удалось получить приватный ключ из контейнера \n$message", "7")
+
+class ReadSignatureFromStreamException(message: String): CryptoProFlutterBaseException("Не удалось записать подпись из потока \n$message", "8")
+

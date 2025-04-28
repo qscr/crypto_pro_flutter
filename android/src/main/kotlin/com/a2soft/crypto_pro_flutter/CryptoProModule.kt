@@ -3,7 +3,10 @@ package com.a2soft.crypto_pro_flutter
 import android.content.Context
 import com.a2soft.crypto_pro_flutter.exceptions.CertificateStatusUnknownOrRevokedException
 import com.a2soft.crypto_pro_flutter.exceptions.CustomWrongPasswordException
+import com.a2soft.crypto_pro_flutter.exceptions.GetCertificateFromContainerException
+import com.a2soft.crypto_pro_flutter.exceptions.GetCertificatePrivateKeyException
 import com.a2soft.crypto_pro_flutter.exceptions.NoPrivateKeyFound
+import com.a2soft.crypto_pro_flutter.exceptions.ReadSignatureFromStreamException
 import com.a2soft.crypto_pro_flutter.exceptions.SomeCertificatesAreNotAddedToTrustStoreException
 import org.json.JSONArray
 import org.json.JSONObject
@@ -192,13 +195,25 @@ class CryptoProModule {
         storageName: String? = null,
         tsaUrl: String? = null // URL TSA (опционально для CAdES-X Long Type 1)
     ) : JSONObject {
+        var keyStore: KeyStore? = null
         // Получаем из HDImage (или из storageName, если передан) сертификат (которым будем подписывать) с приватным ключем
-        val keyStore = KeyStore.getInstance(storageName ?: JCSP.HD_STORE_NAME, JCSP.PROVIDER_NAME)
-        keyStore.load(null, null)
-        val protectionParam = JCPProtectionParameter(password.toCharArray())
-        val privateKeyEntry = keyStore.getEntry(alias, protectionParam as ProtectionParameter) as JCPPrivateKeyEntry
+        try {
+            keyStore = KeyStore.getInstance(storageName ?: JCSP.HD_STORE_NAME, JCSP.PROVIDER_NAME)
+            keyStore.load(null, null)
+        } catch (e: Exception) {
+            throw GetCertificateFromContainerException(storageName ?: JCSP.HD_STORE_NAME, e.toString())
+        }
+
+        var privateKeyEntry: JCPPrivateKeyEntry? = null
+        try {
+            val protectionParam = JCPProtectionParameter(password.toCharArray())
+            privateKeyEntry = keyStore!!.getEntry(alias, protectionParam as ProtectionParameter) as JCPPrivateKeyEntry
+        } catch (e: Exception) {
+            throw GetCertificatePrivateKeyException(e.toString())
+        }
         val certificateChain = privateKeyEntry.certificateChain
         val privateKey = privateKeyEntry.privateKey
+
 
         // Формируем цепочку для подписи
         val chain: MutableList<X509Certificate> = ArrayList()
@@ -230,17 +245,23 @@ class CryptoProModule {
                 throw e
             }
         }
+        var base64: String = ""
+        try {
+            val signatureStream = ByteArrayOutputStream()
 
-        val signatureStream = ByteArrayOutputStream()
+            cAdESSignature.open(signatureStream)
+            cAdESSignature.update(contentToSign)
 
-        cAdESSignature.open(signatureStream)
-        cAdESSignature.update(contentToSign)
+            cAdESSignature.close()
+            signatureStream.close()
 
-        cAdESSignature.close()
-        signatureStream.close()
+            val enc = Encoder()
+            base64 = enc.encode(signatureStream.toByteArray())
+        } catch (e: Exception) {
+            throw ReadSignatureFromStreamException(e.toString())
+        }
 
-        val enc = Encoder()
-        val base64 = enc.encode(signatureStream.toByteArray())
+
 
         val response = JSONObject()
         response.put("success", true)

@@ -59,6 +59,36 @@ mixin ExceptionHandlerMixin {
             ),
             stack,
           );
+        case "6":
+          Error.throwWithStackTrace(
+            GetCertificateFromContainerException(
+              code: e.code,
+              message: e.message,
+              stacktrace: e.stacktrace,
+              details: e.details,
+            ),
+            stack,
+          );
+        case "7":
+          Error.throwWithStackTrace(
+            GetCertificatePrivateKeyException(
+              code: e.code,
+              message: e.message,
+              stacktrace: e.stacktrace,
+              details: e.details,
+            ),
+            stack,
+          );
+        case "8":
+          Error.throwWithStackTrace(
+            ReadSignatureFromStreamException(
+              code: e.code,
+              message: e.message,
+              stacktrace: e.stacktrace,
+              details: e.details,
+            ),
+            stack,
+          );
         default:
           rethrow;
       }

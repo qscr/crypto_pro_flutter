@@ -30,6 +30,7 @@ buildTypes {
 packagingOptions {
     jniLibs {
         useLegacyPackaging = true
+        keepDebugSymbols += ['*/arm64-v8a/*.so', '*/armeabi-v7a/*.so', '*/x86_64/*.so', '*/x86/*.so']
     }
 }
 
@@ -41,7 +42,19 @@ dependencies {
 3. Создать файл `proguard-rules.pro` в `android/app`
 
 ```pro
--keep public class ru.CryptoPro.*
+-dontwarn
+-dontoptimize
+-dontpreverify
+
+-keep class ru.CryptoPro.**
+-keepclassmembers class ru.CryptoPro.** {
+    *;
+}
+
+-keep class ru.cprocsp.**
+-keepclassmembers class ru.cprocsp.** {
+    *;
+}
 ```
 
 Библиотеки .aar указаны в плагине как compile-only, так как невозможно к .aar (коим является этот плагин) подключать другие .aar, для этого требуется скопировать их к себе в проект и подключить как implementation. Proguard используется, чтобы запретить обфускацию кода, которая происходить при выполнении релизной сборки.

@@ -45,3 +45,30 @@ class CertificateStatusUnknownOrRevokedException extends PlatformException {
     super.stacktrace,
   });
 }
+
+class GetCertificateFromContainerException extends PlatformException {
+  GetCertificateFromContainerException({
+    required super.code,
+    super.details,
+    super.message,
+    super.stacktrace,
+  });
+}
+
+class GetCertificatePrivateKeyException extends PlatformException {
+  GetCertificatePrivateKeyException({
+    required super.code,
+    super.details,
+    super.message,
+    super.stacktrace,
+  });
+}
+
+class ReadSignatureFromStreamException extends PlatformException {
+  ReadSignatureFromStreamException({
+    required super.code,
+    super.details,
+    super.message,
+    super.stacktrace,
+  });
+}
