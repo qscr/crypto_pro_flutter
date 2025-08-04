@@ -89,6 +89,26 @@ mixin ExceptionHandlerMixin {
             ),
             stack,
           );
+        case "8":
+          Error.throwWithStackTrace(
+            ReadSignatureFromStreamException(
+              code: e.code,
+              message: e.message,
+              stacktrace: e.stacktrace,
+              details: e.details,
+            ),
+            stack,
+          );
+        case "9":
+          Error.throwWithStackTrace(
+            CertificateChainException(
+              code: e.code,
+              message: e.message,
+              stacktrace: e.stacktrace,
+              details: e.details,
+            ),
+            stack,
+          );
         default:
           rethrow;
       }

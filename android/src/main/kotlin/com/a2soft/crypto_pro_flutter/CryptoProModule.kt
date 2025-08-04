@@ -8,6 +8,7 @@ import com.a2soft.crypto_pro_flutter.exceptions.GetCertificatePrivateKeyExceptio
 import com.a2soft.crypto_pro_flutter.exceptions.NoPrivateKeyFound
 import com.a2soft.crypto_pro_flutter.exceptions.ReadSignatureFromStreamException
 import com.a2soft.crypto_pro_flutter.exceptions.SomeCertificatesAreNotAddedToTrustStoreException
+import com.a2soft.crypto_pro_flutter.exceptions.CertificateChainException
 import org.json.JSONArray
 import org.json.JSONObject
 import ru.CryptoPro.AdES.AdESConfig
@@ -264,9 +265,9 @@ class CryptoProModule {
             )
         } catch (e: CAdESException) {
             if (e.errorCode == 44) {
-                throw CertificateStatusUnknownOrRevokedException()
+                throw CertificateStatusUnknownOrRevokedException(e.toString(), e.errorCode)
             } else {
-                throw e
+                throw CertificateChainException(e.toString(), e.errorCode)
             }
         }
         var base64: String = ""
