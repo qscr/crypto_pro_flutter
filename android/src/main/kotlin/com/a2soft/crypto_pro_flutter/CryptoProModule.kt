@@ -19,12 +19,17 @@ import ru.CryptoPro.JCP.KeyStore.JCPPrivateKeyEntry
 import ru.CryptoPro.JCP.params.JCPProtectionParameter
 import ru.CryptoPro.JCP.tools.Encoder
 import ru.CryptoPro.JCSP.CSPConfig
+import ru.CryptoPro.JCSP.CSPConfigBase
 import ru.CryptoPro.JCSP.JCSP
-import ru.CryptoPro.JCSP.params.JCSPGost2012AlgorithmParameters;
 import ru.CryptoPro.JCSP.exception.WrongPasswordException
 import ru.CryptoPro.JCSP.support.BKSTrustStore
 import ru.CryptoPro.reprov.RevCheck
-import java.io.*
+import ru.cprocsp.ACSP.tools.license.CSPLicenseConstants
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.InputStream
 import java.security.KeyStore
 import java.security.KeyStore.PasswordProtection
 import java.security.KeyStore.ProtectionParameter
@@ -32,6 +37,7 @@ import java.security.KeyStoreException
 import java.security.Security
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
+
 
 /** Модуль для работы с Crypto Pro */
 class CryptoProModule {
@@ -42,6 +48,24 @@ class CryptoProModule {
             if (instance == null) instance = CryptoProModule()
             return instance!!
         }
+    }
+
+    fun setLicense(number: String): Boolean {
+        val providerInfo = CSPConfigBase.getCSPProviderInfo()
+        val license = providerInfo.license
+        return license.checkAndSave(number, true) == CSPLicenseConstants.LICENSE_STATUS_OK
+    }
+
+    fun getLicense(): JSONObject {
+        val providerInfo = CSPConfigBase.getCSPProviderInfo()
+        val license = providerInfo.license
+
+        val result = JSONObject()
+        result.put("serialNumber", license.serialNumber)
+        result.put("expiredThroughDays", license.expiredThroughDays)
+        result.put("licenseInstallDate", license.licenseInstallDateAsString)
+        result.put("existingLicenseStatus", license.existingLicenseStatus)
+        return result
     }
 
     /** Инициализация провайдера */

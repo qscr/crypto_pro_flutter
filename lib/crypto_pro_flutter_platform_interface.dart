@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:crypto_pro_flutter/models/certificate.dart';
+import 'package:crypto_pro_flutter/models/license.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'crypto_pro_flutter_method_channel.dart';
@@ -36,6 +37,16 @@ abstract class CryptoProFlutterPlatform extends PlatformInterface {
     throw UnimplementedError('initCSP() has not been implemented.');
   }
 
+  /// Получить информацию о лицензировании
+  Future<CryptoProLicenseInfo> getLicense() {
+    throw UnimplementedError('getLicense() has not been implemented.');
+  }
+
+  /// Установить новую лицензию
+  Future<bool> setLicense(String number) {
+    throw UnimplementedError('setLicense() has not been implemented.');
+  }
+
   /// Добавить новый сертификат в формате Pfx
   Future<Certificate> addCertificate({
     required File file,
@@ -51,7 +62,8 @@ abstract class CryptoProFlutterPlatform extends PlatformInterface {
     required String password,
     String? newPassword,
   }) {
-    throw UnimplementedError('addCertificate() has not been implemented.');
+    throw UnimplementedError(
+        'addContainerFromExternalStorage() has not been implemented.');
   }
 
   /// Получить сертификат с приватным ключом из внутреннего хранилища приложения
@@ -59,14 +71,16 @@ abstract class CryptoProFlutterPlatform extends PlatformInterface {
     required String certificateAlias,
     required String password,
   }) async {
-    throw UnimplementedError('addCertificate() has not been implemented.');
+    throw UnimplementedError(
+        'getPrivateKeyFromInternalContainerByAlias() has not been implemented.');
   }
 
   /// Удаление сертификата и приватного ключа из внутреннего хранилища
   Future<void> removeCertificateWithPrivateKeyFromStorage({
     required String certificateAlias,
   }) async {
-    throw UnimplementedError('addCertificate() has not been implemented.');
+    throw UnimplementedError(
+        'removeCertificateWithPrivateKeyFromStorage() has not been implemented.');
   }
 
   /// Получить сертификат с приватным ключом из внешнего контейнера
@@ -74,19 +88,21 @@ abstract class CryptoProFlutterPlatform extends PlatformInterface {
     required String storageName,
     required String password,
   }) {
-    throw UnimplementedError('addCertificate() has not been implemented.');
+    throw UnimplementedError(
+        'readContainerFromExternalStorage() has not been implemented.');
   }
 
   /// Добавить сертификаты в хранилище доверенных приложения
   Future<void> addCertificatesToTrustedStorage({
     required List<String> paths,
   }) {
-    throw UnimplementedError('addCertificate() has not been implemented.');
+    throw UnimplementedError(
+        'addCertificatesToTrustedStorage() has not been implemented.');
   }
 
   /// Удалить сертификат
   Future<void> deleteCertificate(Certificate certificate) {
-    throw UnimplementedError('signMessage() has not been implemented.');
+    throw UnimplementedError('deleteCertificate() has not been implemented.');
   }
 
   /// Получит список установленных сертификатов

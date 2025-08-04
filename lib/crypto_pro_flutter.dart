@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:crypto_pro_flutter/models/certificate.dart';
+import 'package:crypto_pro_flutter/models/license.dart';
 
 import 'crypto_pro_flutter_platform_interface.dart';
 
@@ -8,6 +9,16 @@ class CryptoProFlutter {
   /// Инициализация провайдера
   Future<bool> initCSP() {
     return CryptoProFlutterPlatform.instance.initCSP();
+  }
+
+  /// Получить информацию о лицензировании
+  Future<CryptoProLicenseInfo> getLicense() {
+    return CryptoProFlutterPlatform.instance.getLicense();
+  }
+
+  /// Установить новую лицензию
+  Future<bool> setLicense(String number) {
+    return CryptoProFlutterPlatform.instance.setLicense(number);
   }
 
   /// Добавить сертификаты в хранилище доверенных приложения

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto_pro_flutter/models/certificate.dart';
+import 'package:crypto_pro_flutter/models/license.dart';
 import 'package:crypto_pro_flutter/utils/exception_handler_mixin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -17,6 +18,27 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform
   @override
   Future<bool> initCSP() async {
     final result = await methodChannel.invokeMethod<bool>('initCSP');
+    return result ?? false;
+  }
+
+  /// Получить информацию о лицензировании
+  @override
+  Future<CryptoProLicenseInfo> getLicense() async {
+    String response = await methodChannel.invokeMethod('getLicense');
+    Map<String, dynamic> map = json.decode(response) as Map<String, dynamic>;
+    final info = CryptoProLicenseInfo.fromMap(map);
+    return info;
+  }
+
+  /// Установить новую лицензию
+  @override
+  Future<bool> setLicense(String number) async {
+    final result = await methodChannel.invokeMethod<bool>(
+      'setLicense',
+      {
+        "number": number,
+      },
+    );
     return result ?? false;
   }
 

@@ -49,6 +49,21 @@ class CryptoProFlutterPlugin: FlutterPlugin, MethodCallHandler {
               result.success(instance.initCSP(context!!))
             }
           }
+          "setLicense" -> {
+            val number = call.argument<String>("number")
+            if (number != null) {
+              scope.launch {
+                result.success(instance.setLicense(number))
+              }
+            } else {
+              throw ArgumentsParsingException()
+            }
+          }
+          "getLicense" -> {
+            scope.launch {
+              result.success(instance.getLicense().toString())
+            }
+          }
           "addPfxCertificate" -> {
             val path = call.argument<String>("path")
             val password = call.argument<String>("password")

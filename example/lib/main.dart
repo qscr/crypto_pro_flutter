@@ -84,6 +84,28 @@ class _MyAppState extends State<MyApp> {
               children: [
                 ElevatedButton(
                   onPressed: () async {
+                    final result = await _cryptoProFlutterPlugin.setLicense(
+                      '11111-11111-11111-11111-11111',
+                    );
+                    print(result);
+                  },
+                  child: const Text(
+                    "Установить лицензию",
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final license = await _cryptoProFlutterPlugin.getLicense();
+                    print(license);
+                  },
+                  child: const Text(
+                    "Получить лицензию",
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
                     FilePickerResult? result =
                         await FilePicker.platform.pickFiles();
                     if (result?.isSinglePick ?? false) {
