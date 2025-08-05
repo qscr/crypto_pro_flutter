@@ -27,7 +27,8 @@ class ArgumentsParsingException extends PlatformException {
   });
 }
 
-class SomeCertificatesAreNotAddedToTrustStoreException extends PlatformException {
+class SomeCertificatesAreNotAddedToTrustStoreException
+    extends PlatformException {
   SomeCertificatesAreNotAddedToTrustStoreException({
     required super.code,
     super.details,
@@ -72,8 +73,8 @@ class ReadSignatureFromStreamException extends PlatformException {
   });
 }
 
-class CertificateChainException extends PlatformException {
-  CertificateChainException({
+class AddSignerUnknownException extends PlatformException {
+  AddSignerUnknownException({
     required super.code,
     super.details,
     super.message,

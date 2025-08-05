@@ -3,6 +3,7 @@ package com.a2soft.crypto_pro_flutter
 import android.content.Context
 import androidx.annotation.NonNull
 import com.a2soft.crypto_pro_flutter.exceptions.ArgumentsParsingException
+import com.a2soft.crypto_pro_flutter.exceptions.BaseCustomCadesException
 import com.a2soft.crypto_pro_flutter.exceptions.CryptoProFlutterBaseException
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -34,6 +35,11 @@ class CryptoProFlutterPlugin: FlutterPlugin, MethodCallHandler {
     val exceptionHandler = CoroutineExceptionHandler { _, e ->
       if (e is CryptoProFlutterBaseException) {
         result.error(e.code, e.message, e.stackTraceToString())
+        return@CoroutineExceptionHandler
+      }
+
+      if (e is BaseCustomCadesException) {
+        result.error(e.code, e.toString(), null)
         return@CoroutineExceptionHandler
       }
 

@@ -101,7 +101,7 @@ mixin ExceptionHandlerMixin {
           );
         case "9":
           Error.throwWithStackTrace(
-            CertificateChainException(
+            AddSignerUnknownException(
               code: e.code,
               message: e.message,
               stacktrace: e.stacktrace,

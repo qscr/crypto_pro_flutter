@@ -265,9 +265,9 @@ class CryptoProModule {
             )
         } catch (e: CAdESException) {
             if (e.errorCode == 44) {
-                throw AddSignerCertificateStatusUnknownOrRevokedException(e, e.errorCode)
+                throw AddSignerCertificateStatusUnknownOrRevokedException(e)
             } else {
-                throw AddSignerUnknownException(e, e.errorCode)
+                throw AddSignerUnknownException(e)
             }
         }
         var base64: String = ""
