@@ -1,7 +1,8 @@
 package com.a2soft.crypto_pro_flutter
 
 import android.content.Context
-import com.a2soft.crypto_pro_flutter.exceptions.CertificateStatusUnknownOrRevokedException
+import com.a2soft.crypto_pro_flutter.exceptions.AddSignerCertificateStatusUnknownOrRevokedException
+import com.a2soft.crypto_pro_flutter.exceptions.AddSignerUnknownException
 import com.a2soft.crypto_pro_flutter.exceptions.CustomWrongPasswordException
 import com.a2soft.crypto_pro_flutter.exceptions.GetCertificateFromContainerException
 import com.a2soft.crypto_pro_flutter.exceptions.GetCertificatePrivateKeyException
@@ -264,9 +265,9 @@ class CryptoProModule {
             )
         } catch (e: CAdESException) {
             if (e.errorCode == 44) {
-                throw CertificateStatusUnknownOrRevokedException()
+                throw AddSignerCertificateStatusUnknownOrRevokedException(e, e.errorCode)
             } else {
-                throw e
+                throw AddSignerUnknownException(e, e.errorCode)
             }
         }
         var base64: String = ""
