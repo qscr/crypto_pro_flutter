@@ -1,14 +1,14 @@
 package com.a2soft.crypto_pro_flutter
 
 import android.content.Context
-import com.a2soft.crypto_pro_flutter.exceptions.CertificateStatusUnknownOrRevokedException
+import com.a2soft.crypto_pro_flutter.exceptions.AddSignerCertificateStatusUnknownOrRevokedException
+import com.a2soft.crypto_pro_flutter.exceptions.AddSignerUnknownException
 import com.a2soft.crypto_pro_flutter.exceptions.CustomWrongPasswordException
 import com.a2soft.crypto_pro_flutter.exceptions.GetCertificateFromContainerException
 import com.a2soft.crypto_pro_flutter.exceptions.GetCertificatePrivateKeyException
 import com.a2soft.crypto_pro_flutter.exceptions.NoPrivateKeyFound
 import com.a2soft.crypto_pro_flutter.exceptions.ReadSignatureFromStreamException
 import com.a2soft.crypto_pro_flutter.exceptions.SomeCertificatesAreNotAddedToTrustStoreException
-import com.a2soft.crypto_pro_flutter.exceptions.CertificateChainException
 import org.json.JSONArray
 import org.json.JSONObject
 import ru.CryptoPro.AdES.AdESConfig
@@ -265,9 +265,9 @@ class CryptoProModule {
             )
         } catch (e: CAdESException) {
             if (e.errorCode == 44) {
-                throw CertificateStatusUnknownOrRevokedException(e.toString(), e.errorCode)
+                throw AddSignerCertificateStatusUnknownOrRevokedException(e, e.errorCode)
             } else {
-                throw CertificateChainException(e.toString(), e.errorCode)
+                throw AddSignerUnknownException(e, e.errorCode)
             }
         }
         var base64: String = ""
