@@ -108,8 +108,6 @@ class CryptoProModule {
             // включена.
             System.setProperty("com.sun.security.enableCRLDP", "true")
             System.setProperty("com.ibm.security.enableCRLDP", "true")
-            System.setProperty("com.sun.security.enableAIAcaIssuers", "true")
-            System.setProperty("ru.CryptoPro.reprov.enableAIAcaIssuers", "true")
         }
 
         return initOk
@@ -236,15 +234,15 @@ class CryptoProModule {
         } catch (e: Exception) {
             throw GetCertificatePrivateKeyException(e.toString())
         }
-        val certificateChain = privateKeyEntry.certificateChain
+        val certificateChain = keyStore.getCertificateChain(alias)
         val privateKey = privateKeyEntry.privateKey
-
 
         // Формируем цепочку для подписи
         val chain: MutableList<X509Certificate> = ArrayList()
         for (cert in certificateChain) {
             chain.add(cert as X509Certificate)
         }
+        val jsonChain = JSONArray(chain.map {certificate -> getJSONCertificate(certificate = certificate, alias = null) })
 
         val cAdESSignature = CAdESSignature(detached, signHash)
         if (disableOnlineValidation) {
@@ -265,9 +263,9 @@ class CryptoProModule {
             )
         } catch (e: CAdESException) {
             if (e.errorCode == 44) {
-                throw AddSignerCertificateStatusUnknownOrRevokedException(e)
+                throw AddSignerCertificateStatusUnknownOrRevokedException(e, jsonChain)
             } else {
-                throw AddSignerUnknownException(e)
+                throw AddSignerUnknownException(e, jsonChain)
             }
         }
         var base64: String = ""
@@ -291,6 +289,7 @@ class CryptoProModule {
         val response = JSONObject()
         response.put("success", true)
         response.put("signBase64", base64)
+        response.put("chain", jsonChain)
         return response
     }
 
@@ -457,10 +456,10 @@ class CryptoProModule {
     }
 
     /** Получаем JSON-модель по сертификату и алиасу */
-    private fun getJSONCertificate(alias: String, certificate: X509Certificate): JSONObject {
+    private fun getJSONCertificate(alias: String?, certificate: X509Certificate): JSONObject {
         val certificateJSON = JSONObject()
 
-        certificateJSON.put("alias", alias)
+        if (alias != null) certificateJSON.put("alias", alias)
         certificateJSON.put("owner", certificate.subjectDN.name)
         certificateJSON.put("issuer", certificate.issuerDN.name)
         certificateJSON.put("serialNumber", certificate.serialNumber.toString())

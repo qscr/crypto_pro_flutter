@@ -189,8 +189,8 @@ class _MyAppState extends State<MyApp> {
                         password: "11111111",
                         format: CAdESFormat.BES,
                       );
-                      log(sign);
-                      Clipboard.setData(ClipboardData(text: sign));
+                      log(sign.base64);
+                      Clipboard.setData(ClipboardData(text: sign.base64));
                     }
                   },
                   child: const Text("Подписать файл"),

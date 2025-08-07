@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:crypto_pro_flutter/models/certificate.dart';
 import 'package:crypto_pro_flutter/models/license.dart';
+import 'package:crypto_pro_flutter/models/success_sign.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'crypto_pro_flutter_method_channel.dart';
@@ -112,7 +113,7 @@ abstract class CryptoProFlutterPlatform extends PlatformInterface {
   }
 
   /// Подписать файл
-  Future<String> signFile({
+  Future<SuccessSign> signFile({
     required File file,
     required Certificate certificate,
     required String password,
@@ -126,7 +127,7 @@ abstract class CryptoProFlutterPlatform extends PlatformInterface {
   }
 
   /// Подписать сообщение
-  Future<String> signMessage({
+  Future<SuccessSign> signMessage({
     required String message,
     required Certificate certificate,
     required String password,

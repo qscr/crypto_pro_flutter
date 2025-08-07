@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:crypto_pro_flutter/models/certificate.dart';
 import 'package:crypto_pro_flutter/models/license.dart';
+import 'package:crypto_pro_flutter/models/success_sign.dart';
 
 import 'crypto_pro_flutter_platform_interface.dart';
 
@@ -104,7 +105,7 @@ class CryptoProFlutter {
   }
 
   /// Подписать файл
-  Future<String> signFile({
+  Future<SuccessSign> signFile({
     required File file,
     required Certificate certificate,
     required String password,
@@ -127,7 +128,7 @@ class CryptoProFlutter {
   }
 
   /// Подписать сообщение
-  Future<String> signMessage({
+  Future<SuccessSign> signMessage({
     required String message,
     required Certificate certificate,
     required String password,

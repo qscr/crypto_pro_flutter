@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:crypto_pro_flutter/models/certificate.dart';
 import 'package:crypto_pro_flutter/models/license.dart';
+import 'package:crypto_pro_flutter/models/success_sign.dart';
 import 'package:crypto_pro_flutter/utils/exception_handler_mixin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -152,7 +153,7 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform
   }
 
   @override
-  Future<String> signFile({
+  Future<SuccessSign> signFile({
     required File file,
     required Certificate certificate,
     required String password,
@@ -177,7 +178,7 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform
         },
       );
       Map<String, dynamic> map = json.decode(response);
-      return map["signBase64"] as String;
+      return SuccessSign.fromMap(map);
     });
   }
 
@@ -195,7 +196,7 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform
   }
 
   @override
-  Future<String> signMessage({
+  Future<SuccessSign> signMessage({
     required String message,
     required Certificate certificate,
     required String password,
@@ -221,6 +222,6 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform
       },
     );
     Map<String, dynamic> map = json.decode(response);
-    return map["signBase64"] as String;
+    return SuccessSign.fromMap(map);
   }
 }
