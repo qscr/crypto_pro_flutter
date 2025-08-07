@@ -267,9 +267,9 @@ class CryptoProModule {
             )
         } catch (e: CAdESException) {
             if (e.errorCode == 44) {
-                throw AddSignerCertificateStatusUnknownOrRevokedException(e, jsonChain)
+                throw AddSignerCertificateStatusUnknownOrRevokedException(e)
             } else {
-                throw AddSignerUnknownException(e, jsonChain)
+                throw AddSignerUnknownException(e)
             }
         }
         var base64: String = ""
@@ -293,7 +293,6 @@ class CryptoProModule {
         val response = JSONObject()
         response.put("success", true)
         response.put("signBase64", base64)
-        response.put("chain", jsonChain)
         return response
     }
 

@@ -14,7 +14,7 @@ class ArgumentsParsingException: CryptoProFlutterBaseException("Обязател
 
 class SomeCertificatesAreNotAddedToTrustStoreException(errorCertificateNames: Array<String>): CryptoProFlutterBaseException("Не удалось добавить следующие сертификаты: " + errorCertificateNames.joinToString(", "), "4", null)
 
-class AddSignerCertificateStatusUnknownOrRevokedException(exception: CAdESException, jsonChain: JSONArray): BaseCustomCadesException("5", exception, "Ошибка ${exception.errorCode}. Не удалось проверить сертификат на отзыв", jsonChain)
+class AddSignerCertificateStatusUnknownOrRevokedException(exception: CAdESException): BaseCustomCadesException("5", exception, "Ошибка ${exception.errorCode}. Не удалось проверить сертификат на отзыв", null)
 
 class GetCertificateFromContainerException(container: String, message: String): CryptoProFlutterBaseException("Не удалось получить сертификат из контейнера $container \n$message", "6", null)
 
@@ -22,9 +22,9 @@ class GetCertificatePrivateKeyException(message: String): CryptoProFlutterBaseEx
 
 class ReadSignatureFromStreamException(message: String): CryptoProFlutterBaseException("Не удалось записать подпись из потока \n$message", "8", null)
 
-class AddSignerUnknownException(exception: CAdESException, jsonChain: JSONArray): BaseCustomCadesException("9", exception, "Неизвестная ошибка с кодом ${exception.errorCode}", jsonChain)
+class AddSignerUnknownException(exception: CAdESException): BaseCustomCadesException("9", exception, "Неизвестная ошибка с кодом ${exception.errorCode}", null)
 
-open class BaseCustomCadesException(val code: String, private val exception: CAdESException, private val customMessage: String?, private val jsonChain: JSONArray): Exception() {
+open class BaseCustomCadesException(val code: String, private val exception: CAdESException, private val customMessage: String?, private val jsonChain: JSONArray?): Exception() {
 
     override fun toString(): String {
         val fullMap = linkedMapOf<String, Any?>() // Сохраняем порядок
@@ -57,7 +57,10 @@ open class BaseCustomCadesException(val code: String, private val exception: CAd
             current = current.cause
             level++
         }
-        fullMap["certificateChain"] = jsonChain.join("\n\n")
+
+        if (jsonChain != null) {
+            fullMap["certificateChain"] = jsonChain.join("\n\n")
+        }
 
         return fullMap.entries.joinToString("\n\n") { (key, value) ->
             when (value) {
