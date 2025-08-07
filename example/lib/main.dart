@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:rutoken_flutter/models/device_type.dart';
+import 'package:rutoken_flutter/rutoken_flutter.dart';
 
 void main() {
   runApp(const MyApp());
@@ -42,8 +44,14 @@ class _MyAppState extends State<MyApp> {
     // We also handle the message potentially returning null.
     try {
       initCSPResult = await _cryptoProFlutterPlugin.initCSP();
+      await RutokenFlutter().initialize(types: [RutokenDeviceType.usb]);
+      RutokenFlutter().deviceStream.listen((device) {
+        print(device);
+      });
     } on PlatformException {
       errorMessage = 'Failed to init providers';
+    } catch (e) {
+      print(e);
     }
 
     // If the widget was removed from the tree while the asynchronous platform
@@ -125,7 +133,7 @@ class _MyAppState extends State<MyApp> {
                   onPressed: () async {
                     await _cryptoProFlutterPlugin
                         .addContainerFromExternalStorage(
-                      storageName: 'Aktiv Rutoken ECP BT 1',
+                      storageName: 'Aktiv Rutoken ECP 1',
                       password: "11111111",
                     );
                   },

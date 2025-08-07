@@ -162,13 +162,17 @@ class CryptoProModule {
             trustStoreStream,
             BKSTrustStore.STORAGE_PASSWORD,
         )
-        keyStore.setCertificateEntry(alias, certificate)
-        val updatedTrustStore = FileOutputStream(trustStoreFile)
-        keyStore.store(
-            updatedTrustStore,
-            BKSTrustStore.STORAGE_PASSWORD,
-        )
         trustStoreStream.close()
+        // Добавление сертификата, если его нет.
+        val needAdd = (keyStore.getCertificateAlias(certificate) == null)
+        if (needAdd) {
+            keyStore.setCertificateEntry(alias, certificate)
+            val updatedTrustStore = FileOutputStream(trustStoreFile)
+            keyStore.store(
+                updatedTrustStore,
+                BKSTrustStore.STORAGE_PASSWORD,
+            )
+        }
     }
 
     /** Подписать файл */
