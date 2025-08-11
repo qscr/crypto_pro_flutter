@@ -109,6 +109,26 @@ mixin ExceptionHandlerMixin {
             ),
             stack,
           );
+        case "10":
+          Error.throwWithStackTrace(
+            GetCrlUrlsFromCertificateChainException(
+              code: e.code,
+              message: e.message,
+              stacktrace: e.stacktrace,
+              details: e.details,
+            ),
+            stack,
+          );
+        case "11":
+          Error.throwWithStackTrace(
+            DownloadCrlException(
+              code: e.code,
+              message: e.message,
+              stacktrace: e.stacktrace,
+              details: e.details,
+            ),
+            stack,
+          );
         default:
           rethrow;
       }

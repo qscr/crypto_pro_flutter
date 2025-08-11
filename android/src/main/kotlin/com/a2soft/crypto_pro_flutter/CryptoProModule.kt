@@ -4,11 +4,22 @@ import android.content.Context
 import com.a2soft.crypto_pro_flutter.exceptions.AddSignerCertificateStatusUnknownOrRevokedException
 import com.a2soft.crypto_pro_flutter.exceptions.AddSignerUnknownException
 import com.a2soft.crypto_pro_flutter.exceptions.CustomWrongPasswordException
+import com.a2soft.crypto_pro_flutter.exceptions.DownloadCrlException
 import com.a2soft.crypto_pro_flutter.exceptions.GetCertificateFromContainerException
 import com.a2soft.crypto_pro_flutter.exceptions.GetCertificatePrivateKeyException
+import com.a2soft.crypto_pro_flutter.exceptions.GetCrlUrlsFromCertificateChainException
 import com.a2soft.crypto_pro_flutter.exceptions.NoPrivateKeyFound
 import com.a2soft.crypto_pro_flutter.exceptions.ReadSignatureFromStreamException
 import com.a2soft.crypto_pro_flutter.exceptions.SomeCertificatesAreNotAddedToTrustStoreException
+import org.bouncycastle.asn1.ASN1IA5String
+import org.bouncycastle.asn1.DERIA5String
+import org.bouncycastle.asn1.x509.CRLDistPoint
+import org.bouncycastle.asn1.x509.DistributionPoint
+import org.bouncycastle.asn1.x509.DistributionPointName
+import org.bouncycastle.asn1.x509.Extension
+import org.bouncycastle.asn1.x509.GeneralName
+import org.bouncycastle.asn1.x509.GeneralNames
+import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils
 import org.json.JSONArray
 import org.json.JSONObject
 import ru.CryptoPro.AdES.AdESConfig
@@ -31,12 +42,14 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
+import java.net.URL
 import java.security.KeyStore
 import java.security.KeyStore.PasswordProtection
 import java.security.KeyStore.ProtectionParameter
 import java.security.KeyStoreException
 import java.security.Security
 import java.security.cert.CertificateFactory
+import java.security.cert.X509CRL
 import java.security.cert.X509Certificate
 
 
@@ -260,10 +273,13 @@ class CryptoProModule {
             CAdESFormat.XLongType1 -> CAdESType.CAdES_X_Long_Type_1
         }
 
+        // качаем CRL автоматически
+        val crls = downloadCrlsFromCertificatesChain(chain)
+
         try {
             cAdESSignature.addSigner(
                 JCSP.PROVIDER_NAME, JCSP.GOST_CIPHER_NAME, null, privateKey, chain,
-                cadesType, tsaSeverUrl, false, null, null, null, true,
+                cadesType, tsaSeverUrl, false, null, null, crls, true,
             )
         } catch (e: CAdESException) {
             if (e.errorCode == 44) {
@@ -294,6 +310,65 @@ class CryptoProModule {
         response.put("success", true)
         response.put("signBase64", base64)
         return response
+    }
+
+    // Скачивание crl
+    private fun downloadCRLFromURL(crlURL: String): X509CRL {
+        URL(crlURL).openStream().use { crlStream ->
+            val cf =
+                CertificateFactory.getInstance("X.509")
+            return cf.generateCRL(crlStream) as X509CRL
+        }
+    }
+
+    // Получения списка url для crl из сертификатов и дальнейшее их скачивание
+    private fun downloadCrlsFromCertificatesChain(chain:  MutableList<X509Certificate>): Set<X509CRL> {
+        val crlUrls = mutableListOf<String>()
+        for (certificate in chain) {
+            val crlDPExtensionValue = certificate.getExtensionValue(Extension.cRLDistributionPoints.id)
+                ?: continue
+
+            val asn1Obj = JcaX509ExtensionUtils.parseExtensionValue(crlDPExtensionValue)
+            val distPoint = CRLDistPoint.getInstance(asn1Obj)
+            for (dp in distPoint.distributionPoints) {
+                val dpn = dp.distributionPoint
+                if (dpn != null && dpn.type == DistributionPointName.FULL_NAME) {
+                    val genNames = GeneralNames.getInstance(dpn.name).names
+                    for (genName in genNames) {
+                        if (genName.tagNo == GeneralName.uniformResourceIdentifier) {
+                            val url: String = ASN1IA5String.getInstance(genName.name).string
+                            crlUrls.add(url)
+                        }
+                    }
+                }
+            }
+
+        }
+
+        if (crlUrls.isEmpty()) {
+            throw GetCrlUrlsFromCertificateChainException()
+        }
+
+        val crls: MutableSet<X509CRL> = HashSet()
+        val errorMap = mutableMapOf<String, Exception>()
+
+        for (url in crlUrls) {
+            try {
+                val crl = downloadCRLFromURL(url)
+                crls.add(crl)
+            } catch (e: Exception) {
+                errorMap[url] = e
+                continue
+            }
+        }
+        if (crls.isEmpty()) {
+            val message = errorMap.entries.joinToString(separator = "\n") { (key, value) ->
+                "Не удалось загрузить crl по ${errorMap.entries.size} ссылкам. \nПо адресу $key ошибка: ${value.toString()}"
+            }
+            throw DownloadCrlException(message)
+        }
+
+        return crls
     }
 
     /** Установка PFX-контейнера */

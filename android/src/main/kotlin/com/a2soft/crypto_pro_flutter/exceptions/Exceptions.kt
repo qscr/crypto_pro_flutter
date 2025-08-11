@@ -24,6 +24,10 @@ class ReadSignatureFromStreamException(message: String): CryptoProFlutterBaseExc
 
 class AddSignerUnknownException(exception: CAdESException): BaseCustomCadesException("9", exception, "Неизвестная ошибка с кодом ${exception.errorCode}", null)
 
+class GetCrlUrlsFromCertificateChainException(): CryptoProFlutterBaseException("Не удалось найти ссылки для скачивания CRL в цепочке сертификатов", "10", null)
+
+class DownloadCrlException(message: String): CryptoProFlutterBaseException("Не удалось загрузить crl для проверки \n$message", "11", null)
+
 open class BaseCustomCadesException(val code: String, private val exception: CAdESException, private val customMessage: String?, private val jsonChain: JSONArray?): Exception() {
 
     override fun toString(): String {

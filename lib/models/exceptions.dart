@@ -27,8 +27,7 @@ class ArgumentsParsingException extends PlatformException {
   });
 }
 
-class SomeCertificatesAreNotAddedToTrustStoreException
-    extends PlatformException {
+class SomeCertificatesAreNotAddedToTrustStoreException extends PlatformException {
   SomeCertificatesAreNotAddedToTrustStoreException({
     required super.code,
     super.details,
@@ -75,6 +74,24 @@ class ReadSignatureFromStreamException extends PlatformException {
 
 class AddSignerUnknownException extends PlatformException {
   AddSignerUnknownException({
+    required super.code,
+    super.details,
+    super.message,
+    super.stacktrace,
+  });
+}
+
+class GetCrlUrlsFromCertificateChainException extends PlatformException {
+  GetCrlUrlsFromCertificateChainException({
+    required super.code,
+    super.details,
+    super.message,
+    super.stacktrace,
+  });
+}
+
+class DownloadCrlException extends PlatformException {
+  DownloadCrlException({
     required super.code,
     super.details,
     super.message,
