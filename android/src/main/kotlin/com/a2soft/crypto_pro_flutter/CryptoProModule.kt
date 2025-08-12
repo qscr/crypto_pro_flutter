@@ -34,7 +34,6 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.security.KeyStore
-import java.security.KeyStore.PasswordProtection
 import java.security.KeyStore.ProtectionParameter
 import java.security.KeyStoreException
 import java.security.Security
@@ -338,7 +337,7 @@ class CryptoProModule {
         val keyStore = KeyStore.getInstance(JCSP.HD_STORE_NAME, JCSP.PROVIDER_NAME)
         keyStore.load(null,null)
         try {
-            val protectionParam = PasswordProtection(password.toCharArray())
+            val protectionParam = JCPProtectionParameter(password.toCharArray())
             val entry = keyStore.getEntry(alias, protectionParam) as JCPPrivateKeyEntry
             val certificate = entry.certificate as X509Certificate
 
@@ -367,7 +366,7 @@ class CryptoProModule {
         try {
             // Получаем алиас сертификата с приватным ключем
             val mainCertAlias: String = findPrivateKeyAlias(storage)
-            val protectionParam = PasswordProtection(password.toCharArray())
+            val protectionParam = JCPProtectionParameter(password.toCharArray())
             val entry = storage.getEntry(mainCertAlias, protectionParam) as JCPPrivateKeyEntry
             val certificate = entry.certificate as X509Certificate
 
@@ -392,14 +391,14 @@ class CryptoProModule {
         try {
             // Получаем алиас сертификата с приватным ключем
             val mainCertAlias: String = findPrivateKeyAlias(storage)
-            val protectionParam = PasswordProtection(password.toCharArray())
+            val protectionParam = JCPProtectionParameter(password.toCharArray())
             val entry = storage.getEntry(mainCertAlias, protectionParam) as JCPPrivateKeyEntry
             val certificate = entry.certificate as X509Certificate
             // Загружаем цепочку в HDImage
             val hdKeyStore = KeyStore.getInstance(JCSP.HD_STORE_NAME, JCSP.PROVIDER_NAME)
             hdKeyStore.load(null, null)
             if (!hdKeyStore.containsAlias(mainCertAlias)) {
-                val newProtectionParam = PasswordProtection((newPassword ?: password).toCharArray())
+                val newProtectionParam = JCPProtectionParameter((newPassword ?: password).toCharArray())
                 hdKeyStore.setEntry(mainCertAlias, entry, newProtectionParam)
             }
 
