@@ -161,10 +161,11 @@ class CryptoProFlutterPlugin: FlutterPlugin, MethodCallHandler {
             val tsaUrl = call.argument<String>("tsaUrl")
             val format = call.argument<String>("format")
             val storageName = call.argument<String>("storageName")
+            val rootPaths = call.argument<List<String>>("rootPaths")
             val formatEnum = format?.let { CAdESFormat.valueOf(it) }
             if (path != null && password != null && alias != null && isDetached != null && disableOnlineValidation != null && formatEnum != null) {
               scope.launch {
-                result.success(CryptoProModule.getInstance().signFile(path, alias, password, isDetached, disableOnlineValidation, formatEnum, storageName, tsaUrl).toString())
+                result.success(CryptoProModule.getInstance().signFile(path, alias, password, isDetached, disableOnlineValidation, formatEnum, storageName, tsaUrl, rootPaths).toString())
               }
             } else {
               throw ArgumentsParsingException()
@@ -180,10 +181,11 @@ class CryptoProFlutterPlugin: FlutterPlugin, MethodCallHandler {
             val tsaUrl = call.argument<String>("tsaUrl")
             val format = call.argument<String>("format")
             val storageName = call.argument<String>("storageName")
+            val rootPaths = call.argument<List<String>>("rootPaths")
             val formatEnum = format?.let { CAdESFormat.valueOf(it) }
             if (message != null && password != null && alias != null && isDetached != null && signHash != null && disableOnlineValidation != null && formatEnum != null) {
               scope.launch {
-                result.success(CryptoProModule.getInstance().signMessage(message, alias, password, isDetached, signHash, disableOnlineValidation, formatEnum, storageName, tsaUrl).toString())
+                result.success(CryptoProModule.getInstance().signMessage(message, alias, password, isDetached, signHash, disableOnlineValidation, formatEnum, storageName, tsaUrl, rootPaths).toString())
               }
             } else {
               throw ArgumentsParsingException()

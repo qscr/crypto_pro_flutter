@@ -16,6 +16,7 @@ import ru.CryptoPro.AdES.Options
 import ru.CryptoPro.CAdES.CAdESSignature
 import ru.CryptoPro.CAdES.CAdESType
 import ru.CryptoPro.CAdES.exception.CAdESException
+import ru.CryptoPro.JCP.JCP
 import ru.CryptoPro.JCP.KeyStore.JCPPrivateKeyEntry
 import ru.CryptoPro.JCP.params.JCPProtectionParameter
 import ru.CryptoPro.JCP.tools.Encoder
@@ -25,6 +26,7 @@ import ru.CryptoPro.JCSP.JCSP
 import ru.CryptoPro.JCSP.exception.WrongPasswordException
 import ru.CryptoPro.JCSP.support.BKSTrustStore
 import ru.CryptoPro.reprov.RevCheck
+import ru.cprocsp.ACSP.tools.common.HexString
 import ru.cprocsp.ACSP.tools.license.CSPLicenseConstants
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -77,6 +79,9 @@ class CryptoProModule {
             if (Security.getProvider(JCSP.PROVIDER_NAME) == null) {
                 Security.addProvider(JCSP())
             }
+            if (Security.getProvider(JCP.PROVIDER_NAME) == null) {
+                Security.addProvider(JCP())
+            }
             if (Security.getProvider(RevCheck.PROVIDER_NAME) == null) {
                 Security.addProvider(RevCheck())
             }
@@ -87,8 +92,8 @@ class CryptoProModule {
             System.setProperty("ru.CryptoPro.CAdES.validate_tsp", "false")
 
             // Таймауты для CRL на всякий случай.
-            System.setProperty("com.sun.security.crl.timeout", "20")
-            System.setProperty("ru.CryptoPro.crl.read_timeout", "20")
+            System.setProperty("com.sun.security.crl.timeout", "60")
+            System.setProperty("ru.CryptoPro.crl.read_timeout", "60")
 
 
             // Задание провайдера по умолчанию для CAdES.
@@ -106,8 +111,11 @@ class CryptoProModule {
             // перед добавлением подписанта.
             // По умолчанию проверка цепочки сертификатов подписанта всегда
             // включена.
+            System.setProperty("ru.CryptoPro.reprov.enableCRLDP", "true");
             System.setProperty("com.sun.security.enableCRLDP", "true")
             System.setProperty("com.ibm.security.enableCRLDP", "true")
+            System.setProperty("com.sun.security.enableAIAcaIssuers", "true");
+            System.setProperty("ru.CryptoPro.reprov.enableAIAcaIssuers", "true");
         }
 
         return initOk
@@ -184,7 +192,8 @@ class CryptoProModule {
         disableOnlineValidation: Boolean,
         format: CAdESFormat,
         storageName: String? = null,
-        tsaUrl: String? = null // URL TSA (опционально для CAdES-X Long Type 1)
+        tsaUrl: String? = null, // URL TSA (опционально для CAdES-X Long Type 1)
+        rootPaths: List<String>? = null
     ) : JSONObject {
         val fileInputStream = FileInputStream(filePathToSign)
         val size = fileInputStream.available()
@@ -192,7 +201,7 @@ class CryptoProModule {
         fileInputStream.read(buffer)
         fileInputStream.close()
 
-        return sign(buffer, alias, password, detached, false, disableOnlineValidation, format, storageName, tsaUrl)
+        return sign(buffer, alias, password, detached, false, disableOnlineValidation, format, storageName, tsaUrl, rootPaths)
     }
 
     /** Подписать сообщение */
@@ -205,9 +214,10 @@ class CryptoProModule {
         disableOnlineValidation: Boolean,
         format: CAdESFormat,
         storageName: String? = null,
-        tsaUrl: String? = null // URL TSA (опционально для CAdES-X Long Type 1)
+        tsaUrl: String? = null, // URL TSA (опционально для CAdES-X Long Type 1)
+        rootPaths: List<String>? = null
     ) : JSONObject {
-        return sign(contentToSign.toByteArray(), alias, password, detached, signHash, disableOnlineValidation, format, storageName, tsaUrl)
+        return sign(contentToSign.toByteArray(), alias, password, detached, signHash, disableOnlineValidation, format, storageName, tsaUrl, rootPaths)
     }
 
     /** Подписание массива байт */
@@ -220,7 +230,8 @@ class CryptoProModule {
         disableOnlineValidation: Boolean,
         format: CAdESFormat,
         storageName: String? = null,
-        tsaUrl: String? = null // URL TSA (опционально для CAdES-X Long Type 1)
+        tsaUrl: String? = null, // URL TSA (опционально для CAdES-X Long Type 1)
+        rootPaths: List<String>? = null
     ) : JSONObject {
         var keyStore: KeyStore? = null
         // Получаем из HDImage (или из storageName, если передан) сертификат (которым будем подписывать) с приватным ключем
@@ -238,7 +249,7 @@ class CryptoProModule {
         } catch (e: Exception) {
             throw GetCertificatePrivateKeyException(e.toString())
         }
-        val certificateChain = keyStore.getCertificateChain(alias)
+        val certificateChain = privateKeyEntry.certificateChain
         val privateKey = privateKeyEntry.privateKey
 
         // Формируем цепочку для подписи
@@ -246,7 +257,17 @@ class CryptoProModule {
         for (cert in certificateChain) {
             chain.add(cert as X509Certificate)
         }
-        val jsonChain = JSONArray(chain.map {certificate -> getJSONCertificate(certificate = certificate, alias = null) })
+        if (rootPaths != null) {
+            val certificateFactory = CertificateFactory.getInstance("X.509")
+            for (certPath in rootPaths) {
+                val file = File(certPath)
+                val certificateInputStream = FileInputStream(file)
+                val cert = certificateFactory.generateCertificate(certificateInputStream)
+                if (cert is X509Certificate) {
+                    chain.add(cert)
+                }
+            }
+        }
 
         val cAdESSignature = CAdESSignature(detached, signHash)
         if (disableOnlineValidation) {
@@ -262,7 +283,7 @@ class CryptoProModule {
 
         try {
             cAdESSignature.addSigner(
-                JCSP.PROVIDER_NAME, JCSP.GOST_CIPHER_NAME, null, privateKey, chain,
+                JCSP.PROVIDER_NAME, null, null, privateKey, chain,
                 cadesType, tsaSeverUrl, false, null, null, null, true,
             )
         } catch (e: CAdESException) {
@@ -385,7 +406,11 @@ class CryptoProModule {
             // Добавляем остальные сертификаты в хранилище доверенных
             for (cert in entry.certificateChain) {
                 if (cert is X509Certificate && cert.serialNumber != certificate.serialNumber) {
-                    addToBksTrustStore(cert.serialNumber.toString(), cert)
+                    val alias = HexString.toHex(
+                        cert.serialNumber.toByteArray(),
+                        true
+                    )
+                    addToBksTrustStore(alias, cert)
                 }
             }
 
@@ -408,16 +433,49 @@ class CryptoProModule {
     /** Добавление списка сертификатов в хранилище доверенных */
     fun addCertificatesToTrustedStorage(paths: List<String>) {
         val errorCertificates = mutableListOf<String>()
-        if (paths.isEmpty()) {
-            return
-        }
+        if (paths.isEmpty()) return
 
         val certificateFactory = CertificateFactory.getInstance("X.509")
+
         for (path in paths) {
+            val file = File(path)
+            if (!file.exists()) {
+                errorCertificates.add(path)
+                continue
+            }
+
             try {
-                val certificateInputStream = FileInputStream(path)
-                val certificate = certificateFactory.generateCertificate(certificateInputStream) as X509Certificate
-                addToBksTrustStore(certificate.serialNumber.toString(), certificate)
+                FileInputStream(file).use { inputStream ->
+                    if (path.endsWith(".p7b", ignoreCase = true) || path.endsWith(".p7c", ignoreCase = true)) {
+                        // Обработка p7b: возможно несколько сертификатов
+                        val certificates = certificateFactory.generateCertificates(inputStream)
+                        if (certificates.isEmpty()) {
+                            errorCertificates.add(path)
+                        } else {
+                            for ((index, cert) in certificates.withIndex()) {
+                                if (cert is X509Certificate) {
+                                    val alias = HexString.toHex(
+                                        cert.serialNumber.toByteArray(),
+                                        true
+                                    )
+                                    addToBksTrustStore(alias, cert)
+                                }
+                            }
+                        }
+                    } else {
+                        // Обработка одиночного сертификата (например .cer, .crt, .der)
+                        val cert = certificateFactory.generateCertificate(inputStream)
+                        if (cert is X509Certificate) {
+                            val alias = HexString.toHex(
+                                cert.serialNumber.toByteArray(),
+                                true
+                            )
+                            addToBksTrustStore(alias, cert)
+                        } else {
+                            errorCertificates.add(path)
+                        }
+                    }
+                }
             } catch (e: Exception) {
                 errorCertificates.add(path)
             }

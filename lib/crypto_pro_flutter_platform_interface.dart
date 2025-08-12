@@ -122,6 +122,7 @@ abstract class CryptoProFlutterPlatform extends PlatformInterface {
     bool disableOnlineValidation = false,
     String? tsaUrl,
     String? storageName,
+    List<String>? rootPaths,
   }) {
     throw UnimplementedError('signFile() has not been implemented.');
   }
@@ -137,6 +138,7 @@ abstract class CryptoProFlutterPlatform extends PlatformInterface {
     bool disableOnlineValidation = false,
     String? tsaUrl,
     String? storageName,
+    List<String>? rootPaths,
   }) {
     throw UnimplementedError('signMessage() has not been implemented.');
   }

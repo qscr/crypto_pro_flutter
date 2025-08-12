@@ -47,15 +47,22 @@ android {
 }
 
 dependencies {
-    compileOnly fileTree(dir: 'libs', include: ['*.aar'])
-    implementation "org.bouncycastle:bcprov-jdk18on:1.73"
-    implementation "org.bouncycastle:bcpkix-jdk18on:1.73"
+    compileOnly(fileTree("libs") {include("*.aar")})
+
+    implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
+    implementation("org.bouncycastle:bcpkix-jdk18on:1.78.1")
+    implementation("org.bouncycastle:bcutil-jdk18on:1.78.1")
     implementation 'org.ini4j:ini4j:0.5.4'
 
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.databinding:viewbinding:8.7.2'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     testImplementation 'junit:junit:4.13.2'
+
+    compileOnly("xalan:serializer:2.7.2")
+    implementation("org.apache.santuario:xmlsec:1.4.4")
+
+    compileOnly("org.json:json:20180813")
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

@@ -1,6 +1,6 @@
-# crypto_pro_flutter_example
+# tesssst_example
 
-Demonstrates how to use the crypto_pro_flutter plugin.
+Demonstrates how to use the tesssst plugin.
 
 ## Getting Started
 

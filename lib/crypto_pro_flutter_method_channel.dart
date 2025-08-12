@@ -162,6 +162,7 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform
     bool disableOnlineValidation = false,
     String? tsaUrl,
     String? storageName,
+    List<String>? rootPaths,
   }) async {
     return callWithHandler(() async {
       String response = await methodChannel.invokeMethod(
@@ -175,6 +176,7 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform
           "format": format.name,
           "tsaUrl": tsaUrl,
           "storageName": storageName,
+          "rootPaths": rootPaths,
         },
       );
       Map<String, dynamic> map = json.decode(response);
@@ -206,6 +208,7 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform
     bool disableOnlineValidation = false,
     String? tsaUrl,
     String? storageName,
+    List<String>? rootPaths,
   }) async {
     String response = await methodChannel.invokeMethod(
       "signMessage",
@@ -219,6 +222,7 @@ class MethodChannelCryptoProFlutter extends CryptoProFlutterPlatform
         "format": format.name,
         "tsaUrl": tsaUrl,
         "storageName": storageName,
+        "rootPaths": rootPaths,
       },
     );
     Map<String, dynamic> map = json.decode(response);
