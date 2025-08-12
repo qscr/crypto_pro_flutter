@@ -144,9 +144,43 @@ class _MyAppState extends State<MyApp> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    // final cert = await getAssetFilePath('root_unep_2024.crt');
-                    // await _cryptoProFlutterPlugin
-                    //     .addCertificatesToTrustedStorage(paths: [cert]);
+                    final certAssetNames = [
+                      "root_unep_2024.crt",
+                      "CA.cer",
+                      "GUC.crt",
+                      "guc2022.crt",
+                      "Kaznacheystvo-Rossii.CER",
+                      "Kornevoy-sertifikat-GUTS-2022.CER",
+                      "KUC.cer",
+                      "KUC.crt",
+                      "preprod.cer",
+                      "Root_CA_Greenatom2019.crt",
+                      "Root_CA_Grenatom.cer",
+                      "Root_Greenatom_2012.crt",
+                      "root_greenatom2_2012.crt",
+                      "root_greenatom3_2021.crt",
+                      "root_greenatom4_2022.crt",
+                      "root_greenatom5_2023.crt",
+                      "root_greenatom6_2024.crt",
+                      "root_greenatom7_2025.crt",
+                      "Root_GUC2012.crt",
+                      "root_unep_rosatom_2025.crt",
+                      "RootCA.cer",
+                      "RootRosatomCA.crt",
+                      "Rosatom1.crt",
+                      "Rosatom2.crt",
+                      "Rosatom3.crt",
+                      "RosatomCA.crt",
+                      "testcert.cer",
+                      "UC1GUC.crt",
+                      "ucfk_2022.crt",
+                    ];
+                    final certPaths = await certAssetNames
+                        .map((assetName) => getAssetFilePath(assetName))
+                        .wait;
+
+                    await _cryptoProFlutterPlugin
+                        .addCertificatesToTrustedStorage(paths: certPaths);
                   },
                   child: const Text(
                     "Добавить корневые сертификаты во хранилище доверенных",

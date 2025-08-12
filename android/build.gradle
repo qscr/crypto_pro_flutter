@@ -48,8 +48,8 @@ android {
 
 dependencies {
     compileOnly fileTree(dir: 'libs', include: ['*.aar'])
-    implementation "org.bouncycastle:bcprov-jdk18on:1.73"
-    implementation "org.bouncycastle:bcpkix-jdk18on:1.73"
+    implementation "org.bouncycastle:bcprov-jdk15on:1.60"
+    implementation("org.bouncycastle:bcpkix-jdk15on:1.60")
     implementation 'org.ini4j:ini4j:0.5.4'
 
     implementation 'com.google.android.material:material:1.11.0'

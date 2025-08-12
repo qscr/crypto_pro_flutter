@@ -11,3 +11,8 @@
 -keepclassmembers class ru.cprocsp.** {
     *;
 }
+
+-keep class org.ini4j.**
+-keepclassmembers class org.ini4j.** {
+    *;
+}
