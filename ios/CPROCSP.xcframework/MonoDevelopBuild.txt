@@ -1,0 +1,44 @@
+добавление к моно фреймворка криптопро:
+
+1. переименовать "CPROCSP" в "libCPROCSP.a" 
+2. приатачить нативную ссылку  - выбрать файл "libCPROCSP.a" 
+3. добавить модуль поддержки считывателя libiRockey301_ccid.a, если нужен, так же как пункт 2, или librdrpcsc_emplty, если считыватель не нужен (см. Readers.txt)
+4. добавить в ресурсы все ресурсы фреймворка (папка Resources, включая файл license.enc из корневой папки фреймворка, о его создании см. Readme.txt)
+5. добавить в проект файл AssemblyInfo.cs или дополнить существующий. Если вы планируете использовать считыватель от Feitian содержимое файла будет таким:
+-------------------------
+using System;
+using MonoTouch.ObjCRuntime;
+
+[assembly: LinkWith ("/Users/admin/Library/CPROCSP.framework/libCPROCSP.a", Frameworks="CoreGraphics UIKit Foundation ExternalAccessory", LinkTarget = LinkTarget.ArmV7 | LinkTarget.Simulator,  IsCxx = true,  ForceLoad = true, LinkerFlags = "-lz -liconv -lstdc++ -all_rolad")]
+[assembly: LinkWith ("/Users/admin/Library/CPROCSP.framework/readers/Feitian/libiRockey301_ccid.a", LinkTarget = LinkTarget.ArmV7 | LinkTarget.Simulator, ForceLoad = true, IsCxx = true, LinkerFlags = "-lz -liconv -lstdc++ -all_rolad")]
+-------------------------
+
+где /Users/admin/Library/CPROCSP.framework/ - путь до фреймворка
+
+6. вписать build_step с запуском скрипта ConfigureApplication между линковкой и подписью приложения
+7. отредактировать program_checksum.sh - заменить строку
+          main_off=$[$main_addr-$1]
+      в файле progpam_checksumm.sh на строку
+          main_off=$[$main_addr-$1-1]
+
+8. заменить содержимое файла ConfigureApplication на :
+------------------------------
+#!/bin/bash
+PARAM="\"<путь к собранному приложению>\" program_control_sum"
+PROGRAM_CHECKSUM=`dirname $0`/program_checksum.sh 
+eval $PROGRAM_CHECKSUM $PARAM 
+------------------------------
+где 
+<путь к собранному приложению> -- путь к собранному приложению. Например, если проект называется testcrypt и находится по пути path, путь скорее всего будет таким:
+"/<path>/testcrypt/bin/iPhoneSimulator/Debug/testcrypt.app/testcrypt"
+для сборки под эмулятор или
+"/<path>/testcrypt/bin/iPhone/Debug/testcrypt.app/testcrypt"
+для сборки для устройства.
+
+9. Важно: при сборке ipa в свойствах проекта: Построение -> iOS Build -> Enable debugging необходимо установить галочку, т.к. без этого не работает (причины пока не ясны, но связано с оптимизацией кода).
+
+!!!ВАЖНО!!!---------------------------------------------------------------------
+
+Во время отладки проектов необходимо отключать контроль целостности CSP. Для этого нужно
+вызвать функцию DisableIntegrityCheck() из /Headers/DisableIntegrity.h .
+--------------------------------------------------------------------------------

@@ -9,7 +9,7 @@ mixin ExceptionHandlerMixin {
       return await func();
     } on PlatformException catch (e, stack) {
       switch (e.code) {
-        case "1":
+        case "NoPrivateKeyFound":
           Error.throwWithStackTrace(
             NoPrivateKeyFoundException(
               code: e.code,
@@ -19,7 +19,7 @@ mixin ExceptionHandlerMixin {
             ),
             stack,
           );
-        case "2":
+        case "CustomWrongPasswordException":
           Error.throwWithStackTrace(
             WrongPasswordException(
               code: e.code,
@@ -29,7 +29,7 @@ mixin ExceptionHandlerMixin {
             ),
             stack,
           );
-        case "3":
+        case "ArgumentsParsingException":
           Error.throwWithStackTrace(
             ArgumentsParsingException(
               code: e.code,
@@ -39,7 +39,7 @@ mixin ExceptionHandlerMixin {
             ),
             stack,
           );
-        case "4":
+        case "SomeCertificatesAreNotAddedToTrustStoreException":
           Error.throwWithStackTrace(
             SomeCertificatesAreNotAddedToTrustStoreException(
               code: e.code,
@@ -49,7 +49,7 @@ mixin ExceptionHandlerMixin {
             ),
             stack,
           );
-        case "5":
+        case "AddSignerCertificateStatusUnknownOrRevokedException":
           Error.throwWithStackTrace(
             CertificateStatusUnknownOrRevokedException(
               code: e.code,
@@ -59,7 +59,7 @@ mixin ExceptionHandlerMixin {
             ),
             stack,
           );
-        case "6":
+        case "GetCertificateFromContainerException":
           Error.throwWithStackTrace(
             GetCertificateFromContainerException(
               code: e.code,
@@ -69,7 +69,7 @@ mixin ExceptionHandlerMixin {
             ),
             stack,
           );
-        case "7":
+        case "GetCertificatePrivateKeyException":
           Error.throwWithStackTrace(
             GetCertificatePrivateKeyException(
               code: e.code,
@@ -79,7 +79,7 @@ mixin ExceptionHandlerMixin {
             ),
             stack,
           );
-        case "8":
+        case "ReadSignatureFromStreamException":
           Error.throwWithStackTrace(
             ReadSignatureFromStreamException(
               code: e.code,
@@ -89,17 +89,7 @@ mixin ExceptionHandlerMixin {
             ),
             stack,
           );
-        case "8":
-          Error.throwWithStackTrace(
-            ReadSignatureFromStreamException(
-              code: e.code,
-              message: e.message,
-              stacktrace: e.stacktrace,
-              details: e.details,
-            ),
-            stack,
-          );
-        case "9":
+        case "AddSignerUnknownException":
           Error.throwWithStackTrace(
             AddSignerUnknownException(
               code: e.code,

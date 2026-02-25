@@ -1,6 +1,6 @@
-# crypto_pro_flutter_example
+# my_plugin_android_stub_example
 
-Demonstrates how to use the crypto_pro_flutter plugin.
+Demonstrates how to use the my_plugin_android_stub plugin.
 
 ## Getting Started
 
