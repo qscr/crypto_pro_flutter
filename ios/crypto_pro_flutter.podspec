@@ -41,7 +41,7 @@ A new Flutter plugin project.
     SCRIPT
   },
   {
-    :name => 'Copy ICU.dat to main bundle',
+    :name => 'Copy Resources folder to main bundle',
     :execution_position => :after_compile,
     :shell_path => '/bin/sh',
     :script => <<-SCRIPT
