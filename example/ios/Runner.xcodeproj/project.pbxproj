@@ -69,19 +69,6 @@
 		F2AAB494989BE0E986778DC2 /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		97581C8F2F240C5F0094131F /* Resources */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			explicitFolders = (
-				locale,
-			);
-			path = Resources;
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
-
 /* Begin PBXFrameworksBuildPhase section */
 		34D60DE3F6F2A55F3CE6059A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
@@ -137,7 +124,6 @@
 		97C146E51CF9000F007C117D = {
 			isa = PBXGroup;
 			children = (
-				97581C8F2F240C5F0094131F /* Resources */,
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
 				97C146EF1CF9000F007C117D /* Products */,
@@ -220,9 +206,6 @@
 			buildRules = (
 			);
 			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				97581C8F2F240C5F0094131F /* Resources */,
 			);
 			name = Runner;
 			productName = Runner;

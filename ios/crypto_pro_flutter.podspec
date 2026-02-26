@@ -29,16 +29,34 @@ A new Flutter plugin project.
   s.preserve_paths = [
     'CPROCSP.xcframework',
   ]
-  s.script_phase = {
-  :name => 'CryptoPro program_checksum (framework)',
-  :execution_position => :after_compile,
-  :script => <<-SCRIPT
-set -e
-SCRIPT_FILE="${PODS_TARGET_SRCROOT}/CPROCSP.xcframework/program_checksum.sh"
-BIN="${CONFIGURATION_BUILD_DIR}/${EXECUTABLE_PATH}"
-"${SCRIPT_FILE}" "${BIN}" framework_control_sum
-  SCRIPT
-  }
+  s.script_phases = [
+  {
+    :name => 'CryptoPro program_checksum (framework)',
+    :execution_position => :after_compile,
+    :script => <<-SCRIPT
+      set -e
+      SCRIPT_FILE="${PODS_TARGET_SRCROOT}/CPROCSP.xcframework/program_checksum.sh"
+      BIN="${CONFIGURATION_BUILD_DIR}/${EXECUTABLE_PATH}"
+      "${SCRIPT_FILE}" "${BIN}" framework_control_sum
+    SCRIPT
+  },
+  {
+    :name => 'Copy ICU.dat to main bundle',
+    :execution_position => :after_compile,
+    :shell_path => '/bin/sh',
+    :script => <<-SCRIPT
+      set -e
+
+      SRC="${PODS_TARGET_SRCROOT}/Resources"
+      DST="${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}"
+
+      echo "Copying from $SRC to $DST"
+
+      mkdir -p "$DST"
+      cp -R "$SRC"/. "$DST"/
+
+    SCRIPT
+  }]
   s.pod_target_xcconfig = {
     'OTHER_LDFLAGS' => '$(inherited) -lc++',
     'ENABLE_DEBUG_DYLIB' => 'NO',
