@@ -1,122 +1,162 @@
-# Плагин для формирования электронной подписи формата CADES-BES с помощью нативных SDK Crypto Pro
+# crypto_pro_flutter
 
-## **Описание**
+Flutter plugin for working with **CryptoPro CSP SDK** on Android and iOS.
 
-Плагин принимает ключевые контейнеры в формате **PKCS12** `.pfx`. Есть возможность интеграции с внешними ключевыми контейнерами (например, Рутокен)
+## Overview
 
-Приватный ключ должен быть помечен как экспортируемый
+The plugin provides functionality for:
 
-Пока Android Only
+- Managing licenses
+- Importing PFX containers
+- Working with trusted and personal certificate stores
+- Accessing external containers (Android, e.g., Rutoken)
+- Signing files and messages using CAdES formats (CADES-BES and CAdES-X Long Type 1)
 
-## **Установка**
+## Supported Platforms
 
-### **Подключение плагина к Android проекту**
+### Android
 
-1. Скопировать `.aar` библиотеки из `android/libs` плагина к себе в проект в `android\app\libs`
+Full support.
 
-2. Добавить в `build.gradle`
+### iOS
+
+External hardware containers are **not supported**.
+
+## Installation
+
+Add the dependency:
+
+```yaml
+dependencies:
+  crypto_pro_flutter: ^latest_version
+```
+
+Then run:
+
+```bash
+flutter pub get
+```
+
+## Android Setup (Required)
+
+### Step 1
+
+CryptoPro SDK is distributed as `.aar` libraries and must be added
+manually. Copy folder with `.aar` files from plugin sources:
+
+    android/libs
+
+into your main application Android `app` folder:
+
+    android/app/libs
+
+### Step 2
+
+In your application `android/app/build.gradle` add:
 
 ```gradle
-minSdkVersion 24
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.aar'])
+}
+```
 
-buildTypes {
-        release {
-            shrinkResources false
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+### Step 3
+
+In your application `android/app/build.gradle` add:
+
+#### Android Gradle Plugin 7.2 and newer
+
+```gradle
+android {
+    packagingOptions {
+        jniLibs {
+            keepDebugSymbols += [
+                '*/arm64-v8a/*.so',
+                '*/armeabi-v7a/*.so',
+                '*/x86_64/*.so'
+            ]
         }
     }
+}
+```
 
-packagingOptions {
-    jniLibs {
-        useLegacyPackaging = true
-        keepDebugSymbols += ['*/arm64-v8a/*.so', '*/armeabi-v7a/*.so', '*/x86_64/*.so', '*/x86/*.so']
+#### Android Gradle Plugin 7.1 and older
+
+```gradle
+android {
+    packagingOptions {
+        doNotStrip "*/arm64-v8a/*.so"
+        doNotStrip "*/armeabi-v7a/*.so"
+        doNotStrip "*/x86_64/*.so"
     }
 }
+```
 
-dependencies {
-    implementation fileTree(dir: 'libs', include: '*.aar')
+### Step 4
+
+#### Android Gradle Plugin 4.2.0 and newer
+
+In your application `android/app/build.gradle` add:
+
+```gradle
+android {
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging true
+        }
+    }
 }
 ```
 
-3. Создать файл `proguard-rules.pro` в `android/app`
+#### Android Gradle Plugin 3.3.0 - 8.0
 
-```pro
--dontwarn
--dontoptimize
--dontpreverify
+In your application `android/gradle.properties` add:
 
--keep class ru.CryptoPro.**
--keepclassmembers class ru.CryptoPro.** {
-    *;
-}
+```
+android.bundle.enableUncompressedNativeLibs = false
+```
 
--keep class ru.cprocsp.**
--keepclassmembers class ru.cprocsp.** {
-    *;
+#### Android Gradle Plugin 3.6.0 - 4.1.0
+
+In your application `AndroidManifest.xml`:
+
+```
+<application
+    android:extractNativeLibs="true">
+</application>
+```
+
+### Step 5
+
+It is recommended not to use **resource optimization**, by doing the following:
+
+In your application `android/app/build.gradle` add:
+
+```gradle
+android {
+    buildTypes {
+        release {
+            shrinkResources false
+        }
+        debug {
+            shrinkResources false
+        }
+    }
 }
 ```
 
-Библиотеки .aar указаны в плагине как compile-only, так как невозможно к .aar (коим является этот плагин) подключать другие .aar, для этого требуется скопировать их к себе в проект и подключить как implementation. Proguard используется, чтобы запретить обфускацию кода, которая происходить при выполнении релизной сборки. Подробнее можно прочитать [тут](https://docs.cryptopro.ru/android/samples/ACSPClientApp/obfuscation_and_code_optimization)
+In your application `android/gradle.properties` add:
 
-## **Использование**
+```
+android.enableResourceOptimizations=false
+```
 
-- Инициализировать провайдер
-  ```dart
-  CryptoProFlutter.initCSP()
-  ```
-- Добавить Pfx-контейнер в хранилище
-  ```dart
-  CryptoProFlutter.addPfxCertificate(File file, String password, String newPassword)
-  ```
-- Получить список сертификатов, добавленных пользователем
-  ```dart
-  CryptoProFlutter.getInstalledCertificates()
-  ```
-- Удалить добавленный сертификат
-  ```dart
-  CryptoProFlutter.deleteCertificate(Certificate certificate)
-  ```
-- Подписать файл
-  ```dart
-  CryptoProFlutter.signFile(
-      required File file,
-      required Certificate certificate,
-      required String password,
-      required CAdESFormat format,
-      bool isDetached = true,
-      bool disableOnlineValidation = false,
-      String? tsaUrl,
-  )
-  ```
-- Подписать сообщение
-  ```dart
-  CryptoProFlutter.signMessage({
-      required String message,
-      required Certificate certificate,
-      required String password,
-      required CAdESFormat format,
-      bool isDetached = true,
-      bool signHash = false,
-      bool disableOnlineValidation = false,
-      String? tsaUrl,
-  })
-  ```
-- Добавить внешний контейнер в хранилище
-  ```dart
-  CryptoProFlutter.addContainerFromExternalStorage({
-      required String storageName,
-      required String password,
-      String? newPassword,
-  })
-  ```
-- Добавить сертификаты в хранилище доверенных приложения
-  ```dart
-  CryptoProFlutter.addCertificatesToTrustedStorage({
-      required List<String> paths,
-  })
-  ```
+## API Overview
 
-## Todo
+You can view all available methods and their descriptions in the [dart-doc](https://pub.dev/documentation/crypto_pro_flutter/latest)
 
-- [x] Поддержка iOS
+## TODO
+
+- Improve error handling (specifically native Crypto Pro errors)
+- Add more cases in integration tests
+- Support external containers on iOS
