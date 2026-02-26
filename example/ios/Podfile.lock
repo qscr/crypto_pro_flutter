@@ -1,5 +1,5 @@
 PODS:
-  - crypto_pro_flutter (0.0.1):
+  - crypto_pro_flutter (1.0.0):
     - Flutter
   - DKImagePickerController/Core (4.3.9):
     - DKImagePickerController/ImageDataManager
@@ -73,7 +73,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
 
 SPEC CHECKSUMS:
-  crypto_pro_flutter: 8a9af81ddc016ad31faa7ec65e0946fba3a0973a
+  crypto_pro_flutter: 3ee59698619fc1d9b1677008dd507dae3ef4f531
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
